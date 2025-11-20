@@ -125,6 +125,8 @@ DataInitializer 자동 데이터 생성:
 # ☁ Deployment
 
 - EC2 환경에서 Spring Boot 서버 구성
+- /actuator/health 기반 애플리케이션 상태 점검 (Spring Boot Actuator)
+- AWS Secrets Manager 기반 환경 변수 안전 관리 
 
 <br>
 
@@ -165,6 +167,8 @@ DataInitializer 자동 데이터 생성:
 - Awaitility
 ## Infra & Deployment
 - AWS EC2
+- AWS Secrets Manager
+- Spring Boot Actuator (Health Check)
 
 <br>
 
@@ -185,6 +189,8 @@ DataInitializer 자동 데이터 생성:
 
 - 프론트엔드(웹/챗봇) 연동 테스트 및 오류 해결
 - AWS EC2 배포 환경 구축 및 서버 운영
+- /actuator/health 기반 애플리케이션 상태 점검 구현 (Spring Boot Actuator)
+- AWS Secrets Manager 기반 보안 관리
 
 ## 🟦 Backend B (팀원)
 
