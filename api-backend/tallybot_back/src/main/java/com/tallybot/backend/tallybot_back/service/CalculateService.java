@@ -1,20 +1,20 @@
 package com.tallybot.backend.tallybot_back.service;
 
 //import com.tallybot.backend.tallybot_back.debtopt.Graph;
-import com.tallybot.backend.tallybot_back.debtopt.Graph;
+// import com.tallybot.backend.tallybot_back.debtopt.Graph;
 import com.tallybot.backend.tallybot_back.domain.*;
 import com.tallybot.backend.tallybot_back.dto.*;
 import com.tallybot.backend.tallybot_back.exception.NoSettlementResultException;
 import com.tallybot.backend.tallybot_back.repository.*;
-import com.tallybot.backend.tallybot_back.util.DateUtil;
+// import com.tallybot.backend.tallybot_back.util.DateUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.h2.value.Transfer;
+// import org.h2.value.Transfer;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+// import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import java.util.*;
@@ -36,7 +36,7 @@ public class CalculateService {
     private final SettlementService settlementService;
     private final ParticipantRepository participantRepository;
     private final OptimizationService optimizationService;
-    private final MemberRepository memberRepository;
+//     private final MemberRepository memberRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(CalculateService.class);
 
@@ -132,12 +132,12 @@ public class CalculateService {
 //        );
 
         //최종 버전!
-        int year = request.getStartTime().getYear();
+        // int year = request.getStartTime().getYear();
         int month = request.getStartTime().getMonthValue();
         int day = request.getStartTime().getDayOfMonth();
 
         // endTime에서 연, 월, 일 추출
-        int endYear = request.getEndTime().getYear();
+        // int endYear = request.getEndTime().getYear();
         int endMonth = request.getEndTime().getMonthValue();
         int endDay = request.getEndTime().getDayOfMonth();
 
@@ -296,7 +296,7 @@ public class CalculateService {
             }
 
             // 남은 금액을 각 비율로 나눈다.
-            final int finalAmount = amount;
+        //     final int finalAmount = amount;
             for (Participant pc : s.getParticipants()) {
                 Pair<Member, Member> p = Pair.of(s.getPayer(), pc.getParticipantKey().getMember());
 

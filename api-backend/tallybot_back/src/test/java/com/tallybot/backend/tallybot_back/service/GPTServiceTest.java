@@ -2,6 +2,8 @@ package com.tallybot.backend.tallybot_back.service;
 
 import com.tallybot.backend.tallybot_back.domain.Chat;
 import com.tallybot.backend.tallybot_back.domain.Member;
+import com.tallybot.backend.tallybot_back.repository.*;
+import com.tallybot.backend.tallybot_back.dto.ChatForGptDto;
 import com.tallybot.backend.tallybot_back.dto.SettlementDto;
 import com.tallybot.backend.tallybot_back.exception.NoSettlementResultException;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,26 +15,28 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
+// import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+// import static org.assertj.core.api.Assertions.assertThatThrownBy;
+// import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.BDDMockito.given;
+// import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
 @ActiveProfiles("mock-data")  // 이 프로파일 조합으로 별도 컨텍스트 생성
 public class GPTServiceTest {
     private RestTemplate restTemplate;
+    private GroupRepository groupRepository;
     private GPTService gptService;
 
     @BeforeEach
     void setUp() {
         restTemplate = mock(RestTemplate.class);
-        gptService = new GPTService(restTemplate);
+        groupRepository = mock(GroupRepository.class);
+        gptService = new GPTService(restTemplate, groupRepository);
     }
 
     @Test
@@ -48,17 +52,27 @@ public class GPTServiceTest {
         chat1.setMessage("정산하자");
         chat1.setTimestamp(LocalDateTime.of(2025, 5, 1, 12, 0));
 
-        SettlementDto[] mockResponse = new SettlementDto[]{
-                new SettlementDto(
-                        "장소",
-                        1L,
-                        "삼겹살",
-                        30000,
-                        List.of(1L),
-                        Map.of("지훈", 0),
-                        Map.of("지훈", 100)
-                )
-        };
+        List<Chat> chats = List.of(chat1);
+        List<ChatForGptDto> chatDtos = chats.stream()
+                .map(chat -> new ChatForGptDto(
+                        chat.getChatId(),
+                        chat.getMember().getMemberId(),
+                        chat.getMember().getNickname(),
+                        chat.getMessage(),
+                        chat.getTimestamp()
+                ))
+                .toList();
+
+
+        SettlementDto dto = new SettlementDto();
+        dto.setPlace("장소");
+        dto.setPayer("지훈");
+        dto.setItem("삼겹살");
+        dto.setAmount(30000);
+        dto.setConstants(Map.of("지훈", 0));
+        dto.setRatios(Map.of("지훈", 100));
+
+        SettlementDto[] mockResponse = new SettlementDto[]{ dto };
 
 
 
@@ -66,7 +80,7 @@ public class GPTServiceTest {
                 .thenReturn(new ResponseEntity<>(mockResponse, HttpStatus.OK));
 
         // when
-        List<SettlementDto> results = gptService.returnResults(3L, List.of(chat1));
+        List<SettlementDto> results = gptService.returnResults(3L, chatDtos);
 
         // then
         assertEquals(1, results.size());
@@ -101,12 +115,12 @@ public class GPTServiceTest {
         assertTrue(ex.getMessage().contains("GPT 서버 응답 처리 중 오류"));
     }
 
-    private List<Chat> mockChatList() {
-        Chat chat = new Chat();
-        Member member = new Member();
-        member.setNickname("Alice");
-        chat.setMember(member);
-        chat.setMessage("밥 먹자~");
-        return Collections.singletonList(chat);
-    }
+//     private List<Chat> mockChatList() {
+//         Chat chat = new Chat();
+//         Member member = new Member();
+//         member.setNickname("Alice");
+//         chat.setMember(member);
+//         chat.setMessage("밥 먹자~");
+//         return Collections.singletonList(chat);
+//     }
 }

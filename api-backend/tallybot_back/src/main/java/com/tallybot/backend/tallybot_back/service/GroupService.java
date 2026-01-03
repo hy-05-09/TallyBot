@@ -4,10 +4,10 @@ import com.tallybot.backend.tallybot_back.domain.*;
 import com.tallybot.backend.tallybot_back.dto.GroupCreateRequest;
 import com.tallybot.backend.tallybot_back.dto.GroupCreateResponse;
 import com.tallybot.backend.tallybot_back.repository.*;
-import com.tallybot.backend.tallybot_back.service.*;
+// import com.tallybot.backend.tallybot_back.service.*;
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+// import org.slf4j.Logger;
+// import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,7 +18,7 @@ public class GroupService {
 
     private final GroupRepository groupRepository;
     private final MemberRepository memberRepository;
-    private static final Logger logger = LoggerFactory.getLogger(GroupService.class);
+    // private static final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
 
     public GroupCreateResponse createGroupWithMember(GroupCreateRequest request) {

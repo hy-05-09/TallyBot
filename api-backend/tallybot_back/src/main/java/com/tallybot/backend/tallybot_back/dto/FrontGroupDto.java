@@ -9,5 +9,5 @@ public class FrontGroupDto {
     private Long groupId;
     private String groupName;
     private Integer memberCount;
-    private Integer calculateCount; // ← 추가
+    private Integer calculateCount; 
 }

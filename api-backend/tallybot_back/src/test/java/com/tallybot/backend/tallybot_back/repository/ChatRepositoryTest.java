@@ -74,7 +74,7 @@ class ChatRepositoryTest extends DatabaseTestBase {
         // given
         List<UserGroup> userGroups = new ArrayList<>();
         List<List<Member>> userGroupMembers = new ArrayList<>();
-        List<Chat> chats = new ArrayList<>();
+        // List<Chat> chats = new ArrayList<>();
         for(int i = 0; i < 3; i++) {
             userGroups.add(null);
             userGroupMembers.add(new ArrayList<>());

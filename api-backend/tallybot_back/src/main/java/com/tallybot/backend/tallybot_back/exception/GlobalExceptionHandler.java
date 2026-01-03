@@ -1,7 +1,7 @@
 package com.tallybot.backend.tallybot_back.exception;
 
 import com.tallybot.backend.tallybot_back.dto.ErrorResponse;
-import jakarta.validation.ConstraintViolationException;
+// import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
-import java.util.HashMap;
-import java.util.Map;
+// import java.util.HashMap;
+// import java.util.Map;
 import java.util.NoSuchElementException;
 
 @RestControllerAdvice

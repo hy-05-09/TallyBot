@@ -106,11 +106,11 @@ public class GPTService {
 
 
 
-    private String createSystemMessage(List<Chat> chats) {
-        Set<String> memberNames = chats.stream()
-                .map(chat -> chat.getMember().getNickname())
-                .collect(Collectors.toSet());
+    // private String createSystemMessage(List<Chat> chats) {
+    //     Set<String> memberNames = chats.stream()
+    //             .map(chat -> chat.getMember().getNickname())
+    //             .collect(Collectors.toSet());
 
-        return "members: " + memberNames + "\nmember_count: " + memberNames.size();
-    }
+    //     return "members: " + memberNames + "\nmember_count: " + memberNames.size();
+    // }
 }

@@ -21,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -72,6 +73,18 @@ class CalculateServiceTest {
 
         List<Chat> chats = List.of(createChat("A", "샘플 대화"));
 
+        List<ChatForGptDto> chatDtos = chats.stream()
+                .map(chat -> new ChatForGptDto(
+                        chat.getChatId(),
+                        chat.getMember().getMemberId(),
+                        chat.getMember().getNickname(),
+                        chat.getMessage(),
+                        chat.getTimestamp()
+                ))
+                .toList();  
+         
+        
+            
         SettlementDto dummyDto = new SettlementDto(); // 내용은 필요시 설정
         List<SettlementDto> gptResults = List.of(dummyDto);
 
@@ -88,7 +101,7 @@ class CalculateServiceTest {
         when(groupRepository.findById(groupId)).thenReturn(Optional.of(mockGroup));
         when(calculateRepository.save(any(Calculate.class))).thenReturn(savedCalculate);
         when(chatRepository.findByUserGroupAndTimestampBetween(any(), any(), any())).thenReturn(chats);
-        when(gptService.returnResults(chats)).thenReturn(gptResults);
+        when(gptService.returnResults(groupId, chatDtos)).thenReturn(gptResults);
         when(settlementService.toSettlements(gptResults, fakeCalculateId)).thenReturn(settlements);
         when(settlementRepository.save(any(Settlement.class))).thenReturn(dummySettlement);
 
@@ -121,11 +134,21 @@ class CalculateServiceTest {
 
         List<Chat> chats = List.of(createChat("A", "샘플 대화"));
 
+        List<ChatForGptDto> chatDtos = chats.stream()
+                .map(chat -> new ChatForGptDto(
+                        chat.getChatId(),
+                        chat.getMember().getMemberId(),
+                        chat.getMember().getNickname(),
+                        chat.getMessage(),
+                        chat.getTimestamp()
+                ))
+                .toList();
+
         // mocking
         when(groupRepository.findById(groupId)).thenReturn(Optional.of(mockGroup));
         when(calculateRepository.save(any(Calculate.class))).thenReturn(savedCalculate);
         when(chatRepository.findByUserGroupAndTimestampBetween(any(), any(), any())).thenReturn(chats);
-        when(gptService.returnResults(chats)).thenThrow(new NoSettlementResultException("정산 결과 없음"));
+        when(gptService.returnResults(groupId, chatDtos)).thenThrow(new NoSettlementResultException("정산 결과 없음"));
 
         // when
         Long returnedId = calculateService.startCalculate(request);

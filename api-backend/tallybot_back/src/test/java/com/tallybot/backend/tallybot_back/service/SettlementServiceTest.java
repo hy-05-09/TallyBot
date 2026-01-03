@@ -274,8 +274,7 @@ public class SettlementServiceTest {
         dto.setPlace("호텔");
         dto.setItem("숙박");
         dto.setAmount(90000);
-        dto.setPayerId(1001L);
-        dto.setParticipantIds(List.of(1002L, 1003L));
+        dto.setPayer("1001");
         dto.setConstants(Map.of("1002", 0, "1003", 0));
         dto.setRatios(Map.of("1002", 1, "1003", 2));
 
@@ -305,8 +304,7 @@ public class SettlementServiceTest {
         dto1.setPlace("식당");
         dto1.setItem("점심");
         dto1.setAmount(30000);
-        dto1.setPayerId(1001L);
-        dto1.setParticipantIds(List.of(1001L, 1002L));
+        dto1.setPayer("1001");
         dto1.setConstants(Map.of("1001", 0, "1002", 0));
         dto1.setRatios(Map.of("1001", 1, "1002", 1));
 

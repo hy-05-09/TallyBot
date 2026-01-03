@@ -1,6 +1,6 @@
 package com.tallybot.backend.tallybot_back.dto;
 
-import com.tallybot.backend.tallybot_back.domain.Ratio;
+// import com.tallybot.backend.tallybot_back.domain.Ratio;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

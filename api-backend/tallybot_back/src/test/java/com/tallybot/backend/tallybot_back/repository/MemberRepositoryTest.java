@@ -151,10 +151,10 @@ class MemberRepositoryTest extends DatabaseTestBase {
         // when
         List<List<Boolean>> exists = new ArrayList<>();
         List<Integer> countByUserGroup = new ArrayList<>();
-        List<List<Member>> findsByUserGroup = new ArrayList();
-        List<List<Optional<Member>>> findByMemberIdAndUserGroup = new ArrayList();
+        List<List<Member>> findsByUserGroup = new ArrayList<>();
+        List<List<Optional<Member>>> findByMemberIdAndUserGroup = new ArrayList<>();
         List<List<Boolean>> existsByUserGroupAndNickname = new ArrayList<>();
-        List<List<Optional<Member>>> findById = new ArrayList();
+        List<List<Optional<Member>>> findById = new ArrayList<>();
 
         for(int i = 0; i < 3; i++) {
             exists.add(new ArrayList<>());
@@ -187,12 +187,12 @@ class MemberRepositoryTest extends DatabaseTestBase {
 
         List<List<Boolean>> existsFalse = new ArrayList<>();
         List<Integer> countByUserGroupFalse = new ArrayList<>();
-        List<List<Member>> findsByUserGroupFalse = new ArrayList();
-        List<List<Optional<Member>>> findByMemberIdAndUserGroupFalse1 = new ArrayList();
-        List<List<Optional<Member>>> findByMemberIdAndUserGroupFalse2 = new ArrayList();
+        List<List<Member>> findsByUserGroupFalse = new ArrayList<>();
+        List<List<Optional<Member>>> findByMemberIdAndUserGroupFalse1 = new ArrayList<>();
+        List<List<Optional<Member>>> findByMemberIdAndUserGroupFalse2 = new ArrayList<>();
         List<List<Boolean>> existsByUserGroupAndNicknameFalse1 = new ArrayList<>();
         List<List<Boolean>> existsByUserGroupAndNicknameFalse2 = new ArrayList<>();
-        List<List<Optional<Member>>> findByIdFalse = new ArrayList();
+        List<List<Optional<Member>>> findByIdFalse = new ArrayList<>();
 
         for(int i = 0; i < 3; i++) {
             existsFalse.add(new ArrayList<>());

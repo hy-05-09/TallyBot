@@ -7,7 +7,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.*;
-import java.util.stream.Collectors;
+// import java.util.stream.Collectors;
 
 
 @Service
@@ -18,7 +18,7 @@ public class SettlementService {
     private final SettlementRepository settlementRepository;
     private final MemberRepository memberRepository;
     private final CalculateRepository calculateRepository;
-    private final GroupRepository groupRepository;
+    // private final GroupRepository groupRepository;
     private final OptimizationService optimizationService;
     private final CalculateDetailRepository calculateDetailRepository;
 
@@ -104,7 +104,7 @@ public class SettlementService {
             List<Member> participants;
             Map<String, Integer> constants = request.getConstants();
             Map<String, Integer> ratios = request.getRatios();
-            Integer sum = request.getSum();
+            // Integer sum = request.getSum();
 
 
             if (rawParticipants == null) {

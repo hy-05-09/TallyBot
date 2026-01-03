@@ -4,7 +4,7 @@ import com.tallybot.backend.tallybot_back.domain.Chat;
 import com.tallybot.backend.tallybot_back.domain.UserGroup;
 import com.tallybot.backend.tallybot_back.domain.Member;
 import com.tallybot.backend.tallybot_back.dto.ChatDto;
-import com.tallybot.backend.tallybot_back.dto.ChatForGptDto;
+// import com.tallybot.backend.tallybot_back.dto.ChatForGptDto;
 import com.tallybot.backend.tallybot_back.dto.ChatResponseDto;
 import com.tallybot.backend.tallybot_back.repository.*;
 import lombok.RequiredArgsConstructor;

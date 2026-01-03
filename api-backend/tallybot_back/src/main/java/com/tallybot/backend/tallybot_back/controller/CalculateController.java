@@ -83,7 +83,7 @@ public class CalculateController {
                     .body(new ErrorResponse("Calculate not found."));
         }
 
-        Calculate calculate = optionalCalculate.get();
+        // Calculate calculate = optionalCalculate.get();
 //        List<Settlement> settlements = settlementRepository.findByCalculate(calculate);
         List<Settlement> settlements = settlementRepository.findWithParticipantsByCalculateId(calculateId);
 
