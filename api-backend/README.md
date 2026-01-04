@@ -1,12 +1,11 @@
 # 🧮 TallyBot Backend 
 
-TallyBot은 카카오톡 대화 기반 자동 정산 서비스로,
-사용자가 업로드한 대화를 분석하 결제 내역을 추출하고,
-송금 관계를 최소화한 최적 정산 결과를 제공하는 서비스입니다.
+TallyBot은 카카오톡 대화 데이터를 기반으로  
+비정형 메시지에서 결제 정보를 추출하고,  
+송금 관계를 최소화한 정산 결과를 자동 생성하는 백엔드 서비스입니다.
 
-Backend는 Spring Boot 기반 REST API 서버로 구성되며,
-업로드된 대화 → 데이터 전처리 → GPT 기반 정보 추출 → 정산 생성 → 최적화 → 응답 반환까지
-완전한 백엔드 파이프라인을 구현했습니다.
+GPT 기반 비동기 처리, 정산 실패 롤백, 그래프 기반 최적화를 포함한  
+실제 운영을 고려한 정산 파이프라인을 Spring Boot로 구현했습니다.
 
 <br>
 
@@ -17,7 +16,7 @@ Backend는 Spring Boot 기반 REST API 서버로 구성되며,
 
 - UserGroup 기반 도메인 구조
 
-  <br>
+---
 
 ## 2️⃣ Chat Upload & Pre-processing
 
@@ -29,9 +28,9 @@ Backend는 Spring Boot 기반 REST API 서버로 구성되며,
 
 - 정산 기간 내 메시지 필터링
 
-  <br>
+---
 
-## 3️⃣ Calculate Flow (Settlement Pipeline)
+## 3️⃣ Settlement Pipeline (Calculation & Optimization)
 ### ✔ Start Settlement
 
 <kbd>POST /api/calculate/start</kbd>
@@ -50,7 +49,12 @@ Backend는 Spring Boot 기반 REST API 서버로 구성되며,
 
 - system + user 기반 메시지 변환
 
-- 응답 null/empty 시 NoSettlementResultException 발생
+- GPT 응답 누락·지연·부분 응답 등 불안정성을 고려한 방어 로직 구현
+
+- 정산 결과 생성 실패 시 Calculate 자동 롤백 처리로 데이터 정합성 보장
+  
+- 외부 AI API 의존 환경에서도 서비스 안정성을 유지하도록 설계
+
 
 ### ✔ Settlement & Participant Generation
 
@@ -63,7 +67,7 @@ Backend는 Spring Boot 기반 REST API 서버로 구성되며,
 ### ✔ Optimization
 
 - 불필요한 송금 관계를 제거하는 그래프 기반 최적화 적용
-(Graph / Euler Circuit / Summarize 로직)
+- Graph / Euler Circuit / Summarize 알고리즘 활용
 
 ### ✔ Result API
 
@@ -93,6 +97,85 @@ GlobalExceptionHandler에서 다음 처리:
 
 <br> 
 
+## 🧠 Engineering Challenges & Decisions
+
+### 1️⃣ GPT 중복 호출로 인한 정산 결과 비정상 문제
+
+**문제**
+- 정산 요청 시 GPT API가 의도치 않게 두 번 호출되며  
+  동일 결제 정보가 중복 인식되어 정산 결과가 비정상적으로 생성됨
+- 알고리즘 및 GPT 프롬프트는 로컬 환경에서 정상 동작하여  
+  원인 파악이 쉽지 않았음
+
+**과정**
+- GPT 호출 지점을 기준으로 로그를 세분화하여 요청 흐름 추적
+- 동일한 요청이 GPT 서버로 중복 전달되는 현상 확인
+- 디버깅 과정에서 임시로 추가한 raw response 출력 코드가  
+  제거되지 않아 중복 호출을 유발하고 있음을 발견
+
+**해결**
+- GPT 호출을 단일 진입 지점에서만 수행하도록 코드 구조 정리
+- 중복 호출 가능성이 있는 흐름 제거 및 호출 책임 명확화
+
+**결과**
+- 동일 요청에 대한 중복 정산 문제 완전 제거
+- 외부 API 연동 시 호출 흐름을 명확히 통제해야 한다는 점을 체감
+- 이후 모든 외부 API 연동 로직에서 단일 진입점 설계 원칙 유지
+
+---
+
+### 2️⃣ GPT 응답 누락·부분 응답으로 인한 데이터 정합성 문제
+
+**문제**
+- GPT 응답이 null / empty / partial한 경우에도  
+  Calculate 엔티티만 DB에 남아 정산 상태 불일치 발생
+
+**해결**
+- GPT 응답 검증 로직 추가
+- 정산 실패 시 Calculate, Settlement, Participant 전체를  
+  트랜잭션 단위로 롤백 처리
+
+**결과**
+- 실패한 정산 요청이 시스템에 잔존하지 않도록 보장
+- 정산 서비스 특성상 중요한 데이터 정합성 확보
+
+---
+
+### 3️⃣ 정산 기간 입력 방식에 대한 설계 결정
+
+**문제**
+- 정산 기간 입력 방식에 대해 팀 내 다양한 의견 존재  
+  (당일 기준, 마지막 정산 이후, 특정 일자, 기간 입력 등)
+
+**결정**
+- 재정산 필요 상황 및 사용자 실수 복구 시나리오를 고려
+- 시작일과 종료일을 명확히 입력받는 방식이  
+  가장 안정적이라고 판단
+
+**결과**
+- “mm월 dd일 ~ mm월 dd일 정산” 형태로 API 구조 확정
+- 날짜 파싱 기준을 문서화하여 프론트엔드 및 AI 파트와 공유
+- 다양한 사용자 시나리오를 안정적으로 처리 가능
+
+---
+
+### 4️⃣ 운영 관점에서의 서버 상태 관리 도입
+
+**문제**
+- 서버가 정상적으로 기동되었는지 확인할 수 있는 구조 부재 장애 발생 시 원인 파악에 시간 소요
+
+
+**해결**
+- Spring Boot Actuator 기반 `/actuator/health` 활성화 - EC2 배포 환경에서 서버, DB, 외부 API 상태 확인 가능하도록 구성
+
+**결과**
+- 배포 후 서버 상태를 즉시 확인 가능
+- 운영 환경에서의 불확실성 감소
+- 팀원 모두가 동일한 기준으로 서버 상태를 공유
+
+  
+<br>
+
 # 🧪 Test Coverage
 
 - Controller 테스트 (MockMvc)
@@ -104,6 +187,7 @@ GlobalExceptionHandler에서 다음 처리:
 - 비동기 로직 검증 (Awaitility)
 
 - Settlement 변환, Chat 저장, 오류 케이스 등 단위 테스트 포함
+- 외부 API(GPT) 의존성과 비동기 파이프라인 안정성 검증에 중점
 
   <br>
 
@@ -124,9 +208,7 @@ DataInitializer 자동 데이터 생성:
 
 # ☁ Deployment
 
-- EC2 환경에서 Spring Boot 서버 구성
-- /actuator/health 기반 애플리케이션 상태 점검 (Spring Boot Actuator)
-- AWS Secrets Manager 기반 환경 변수 안전 관리 
+- Profile(dev / rds) 분리로 로컬·운영 환경 안전하게 구성
 
 <br>
 
@@ -192,15 +274,21 @@ DataInitializer 자동 데이터 생성:
 - /actuator/health 기반 애플리케이션 상태 점검 구현 (Spring Boot Actuator)
 - AWS Secrets Manager 기반 보안 관리
 
+
 ## 🟦 Backend B (팀원)
 
-- 그래프 기반 송금 최소화 알고리즘 구현
-
+- 그래프 기반 송금 최소화 알고리즘 설계 및 구현
   - Graph / Eulerize / Summarize / UnionFind
-
   - WeightStrategy, FlattedGraph 구조 설계
 
-- OptimizationService 초기 코드 작성
+- 정산 알고리즘 결과를 저장하기 위한
+  DB 테이블 구조 설계 및 일부 엔티티 구현 참여
+
+- 챗봇(카카오톡 연동) 파트 구현 및
+  정산 요청 흐름에서의 사용자 입력 처리 담당
+
+- 초기 데이터 흐름 정의 및
+  백엔드-알고리즘 간 데이터 포맷 논의 참여
 
   <br>
 
@@ -221,11 +309,19 @@ DataInitializer 자동 데이터 생성:
 
 # 🚀 How to Run
 ## Backend (Spring Boot)
-<kbd>./gradlew build</kbd> <br>
 
 ✅ Local (Dev, AWS 미사용)
 로컬에서는 AWS Secrets Manager를 사용하지 않는 dev 프로필로 실행합니다.
 <kbd>./gradlew bootRun --args="--spring.profiles.active=dev"</kbd>
+
+---
+✅ RDS (AWS Secrets Manager 사용)
+
+RDS 환경은 `rds` 프로필을 사용하며,
+DB 접속 정보는 AWS Secrets Manager에서 로드합니다.
+
+AWS Credentials가 설정된 환경(EC2, IAM Role 등)에서만 정상적으로 실행됩니다.
+<kbd>./gradlew bootRun --args="--spring.profiles.active=rds"</kbd>
 
 <br>
 
