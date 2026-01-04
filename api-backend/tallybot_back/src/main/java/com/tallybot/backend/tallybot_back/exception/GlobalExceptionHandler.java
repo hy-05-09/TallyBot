@@ -1,7 +1,9 @@
 package com.tallybot.backend.tallybot_back.exception;
 
 import com.tallybot.backend.tallybot_back.dto.ErrorResponse;
-// import jakarta.validation.ConstraintViolationException;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -9,10 +11,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
 
-// import java.util.HashMap;
-// import java.util.Map;
 import java.util.NoSuchElementException;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -35,16 +36,9 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
-        String message = ex.getMessage();
-
-        // 메시지에 따라 상태 코드 판단 (선택사항)
-        HttpStatus status = (message != null && (
-                message.toLowerCase().contains("not found") || message.contains("없음")))
-                ? HttpStatus.NOT_FOUND
-                : HttpStatus.BAD_REQUEST;
-
-        return ResponseEntity.status(status).body(new ErrorResponse(message));
+        return ResponseEntity.badRequest().body(new ErrorResponse(ex.getMessage()));
     }
+
 
 
     @ExceptionHandler(HandlerMethodValidationException.class)
@@ -66,15 +60,16 @@ public class GlobalExceptionHandler {
 
 
     @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleJsonParseError(Exception ex) {
-        return ResponseEntity.badRequest().body(
-                new ErrorResponse("Invalid input")
-        );
+    public ResponseEntity<ErrorResponse> handleJsonParseError(
+            org.springframework.http.converter.HttpMessageNotReadableException ex
+    ) {
+        return ResponseEntity.badRequest().body(new ErrorResponse("Invalid input"));
     }
+
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
-        ex.printStackTrace(); // 콘솔에 스택트레이스 출력
+        log.error("Unhandled exception", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(new ErrorResponse("Internal server error occurred."));
     }

@@ -1,8 +1,8 @@
-package com.tallybot.backend.tallybot_back.util;
+package com.tallybot.backend.tallybot_back.controller.common;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-public class DateUtil {
+public class DateTimeParser {
 
     // 두 가지 날짜 형식을 지원하는 포맷터
     private static final DateTimeFormatter FORMATTER_1 = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); // 공백을 사용하는 형식

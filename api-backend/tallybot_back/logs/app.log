@@ -1176,3 +1176,278 @@ Caused by: org.hibernate.query.SemanticException: Cannot compare left expression
 2026-01-04T18:05:38.586+09:00  INFO 41148 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
 2026-01-04T18:05:38.586+09:00  INFO 41148 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
 2026-01-04T18:05:38.688+09:00  WARN 41148 --- [http-nio-8080-exec-2] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+2026-01-04T18:17:15.918+09:00  INFO 6504 --- [restartedMain] c.t.b.t.TallybotBackApplication          : Starting TallybotBackApplication using Java 17.0.17 with PID 6504 (C:\Users\jhy69\OneDrive\문서\GitHub\TallyBot\api-backend\tallybot_back\build\classes\java\main started by jhy69 in C:\Users\jhy69\OneDrive\문서\GitHub\TallyBot\api-backend\tallybot_back)
+2026-01-04T18:17:15.921+09:00 DEBUG 6504 --- [restartedMain] c.t.b.t.TallybotBackApplication          : Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-01-04T18:17:15.922+09:00  INFO 6504 --- [restartedMain] c.t.b.t.TallybotBackApplication          : The following 1 profile is active: "dev"
+2026-01-04T18:17:15.955+09:00  INFO 6504 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-01-04T18:17:15.955+09:00  INFO 6504 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-01-04T18:17:16.788+09:00  INFO 6504 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-04T18:17:16.864+09:00  INFO 6504 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 70 ms. Found 7 JPA repository interfaces.
+2026-01-04T18:17:17.514+09:00  INFO 6504 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-01-04T18:17:17.528+09:00  INFO 6504 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-01-04T18:17:17.528+09:00  INFO 6504 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.40]
+2026-01-04T18:17:17.572+09:00  INFO 6504 --- [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-01-04T18:17:17.572+09:00  INFO 6504 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1616 ms
+2026-01-04T18:17:17.821+09:00  INFO 6504 --- [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-04T18:17:17.857+09:00  INFO 6504 --- [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.13.Final
+2026-01-04T18:17:17.880+09:00  INFO 6504 --- [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-01-04T18:17:18.113+09:00  INFO 6504 --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-04T18:17:18.141+09:00  INFO 6504 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-01-04T18:17:18.284+09:00  INFO 6504 --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2026-01-04T18:17:18.287+09:00  INFO 6504 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-01-04T18:17:18.312+09:00  WARN 6504 --- [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-01-04T18:17:18.332+09:00  INFO 6504 --- [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-04T18:17:19.159+09:00  INFO 6504 --- [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-04T18:17:19.173+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    drop table if exists calculate cascade 
+2026-01-04T18:17:19.175+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    drop table if exists calculate_detail cascade 
+2026-01-04T18:17:19.175+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    drop table if exists chat cascade 
+2026-01-04T18:17:19.176+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    drop table if exists member cascade 
+2026-01-04T18:17:19.176+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    drop table if exists participant cascade 
+2026-01-04T18:17:19.176+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    drop table if exists settlement cascade 
+2026-01-04T18:17:19.176+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    drop table if exists user_group cascade 
+2026-01-04T18:17:19.181+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    create table calculate (
+        calculate_id bigint generated by default as identity,
+        end_time timestamp(6) not null,
+        group_id bigint not null,
+        start_time timestamp(6) not null,
+        status enum ('CALCULATING','COMPLETED','PENDING') not null,
+        primary key (calculate_id)
+    )
+2026-01-04T18:17:19.188+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    create table calculate_detail (
+        amount integer not null,
+        calculate_detail_id bigint generated by default as identity,
+        calculate_id bigint not null,
+        payee_id bigint not null,
+        payer_id bigint not null,
+        primary key (calculate_detail_id)
+    )
+2026-01-04T18:17:19.189+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    create table chat (
+        chat_id bigint generated by default as identity,
+        group_id bigint not null,
+        member_id bigint not null,
+        timestamp timestamp(6) not null,
+        message MEDIUMTEXT not null,
+        primary key (chat_id)
+    )
+2026-01-04T18:17:19.190+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    create table member (
+        group_id bigint not null,
+        member_id bigint generated by default as identity,
+        nickname VARCHAR(20) not null,
+        primary key (member_id)
+    )
+2026-01-04T18:17:19.191+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    create table participant (
+        constant integer not null,
+        denominator INT not null,
+        numerator INT not null,
+        member_id bigint not null,
+        settlement_id bigint not null,
+        primary key (member_id, settlement_id)
+    )
+2026-01-04T18:17:19.192+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    create table settlement (
+        amount integer not null,
+        calculate_id bigint not null,
+        group_id bigint not null,
+        payer_id bigint not null,
+        settlement_id bigint generated by default as identity,
+        item varchar(63) not null,
+        place varchar(63) not null,
+        primary key (settlement_id)
+    )
+2026-01-04T18:17:19.194+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    create table user_group (
+        group_id bigint not null,
+        group_name VARCHAR(50) not null,
+        primary key (group_id)
+    )
+2026-01-04T18:17:19.199+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists calculate 
+       add constraint FKfs4jrn8l3wlod5jvvshpim6ws 
+       foreign key (group_id) 
+       references user_group
+2026-01-04T18:17:19.209+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists calculate_detail 
+       add constraint FK885cdgusidxshkubf5w45u1w8 
+       foreign key (calculate_id) 
+       references calculate
+2026-01-04T18:17:19.210+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists calculate_detail 
+       add constraint FK8wd2gu3lo6yh2hu6kc1pfithe 
+       foreign key (payee_id) 
+       references member
+2026-01-04T18:17:19.212+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists calculate_detail 
+       add constraint FK4dg4ixn11w2ghd35u4674ee64 
+       foreign key (payer_id) 
+       references member
+2026-01-04T18:17:19.214+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists chat 
+       add constraint FKgvc5hrt0h18xk63qosss3ti30 
+       foreign key (member_id) 
+       references member
+2026-01-04T18:17:19.216+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists chat 
+       add constraint FKgjakr3e1ux37qs8u392j9dkmo 
+       foreign key (group_id) 
+       references user_group
+2026-01-04T18:17:19.217+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists member 
+       add constraint FKomytwiw2f3cy5b7p829b5c006 
+       foreign key (group_id) 
+       references user_group
+2026-01-04T18:17:19.220+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists participant 
+       add constraint FK6wairr1n12kj12eguo7hokhm1 
+       foreign key (settlement_id) 
+       references settlement
+2026-01-04T18:17:19.223+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists participant 
+       add constraint FKltl2dk33cemkl32l5fo3jmh85 
+       foreign key (member_id) 
+       references member
+2026-01-04T18:17:19.223+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists settlement 
+       add constraint FKkmxgxvfx1l6d5e775maehvcla 
+       foreign key (calculate_id) 
+       references calculate
+2026-01-04T18:17:19.224+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists settlement 
+       add constraint FKd4ewh0mi4sq5g90u0sioo95p8 
+       foreign key (payer_id) 
+       references member
+2026-01-04T18:17:19.226+09:00 DEBUG 6504 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists settlement 
+       add constraint FK919jli1nfm8bqoi64w6f1cmgk 
+       foreign key (group_id) 
+       references user_group
+2026-01-04T18:17:19.231+09:00  INFO 6504 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-04T18:17:19.758+09:00  INFO 6504 --- [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-01-04T18:17:20.499+09:00  INFO 6504 --- [restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:testdb'
+2026-01-04T18:17:20.550+09:00  INFO 6504 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-01-04T18:17:20.555+09:00  INFO 6504 --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 3 endpoints beneath base path '/actuator'
+2026-01-04T18:17:20.602+09:00  INFO 6504 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-01-04T18:17:20.613+09:00  INFO 6504 --- [restartedMain] c.t.b.t.TallybotBackApplication          : Started TallybotBackApplication in 5.022 seconds (process running for 5.329)
+2026-01-04T18:17:21.006+09:00  INFO 6504 --- [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-01-04T18:17:21.006+09:00  INFO 6504 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-01-04T18:17:21.007+09:00  INFO 6504 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2026-01-04T18:17:21.103+09:00 ERROR 6504 --- [http-nio-8080-exec-2] c.t.b.t.e.GlobalExceptionHandler         : Unhandled exception
+
+org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.
+	at org.springframework.web.servlet.resource.ResourceHttpRequestHandler.handleRequest(ResourceHttpRequestHandler.java:585) ~[spring-webmvc-6.2.6.jar:6.2.6]
+	at org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter.handle(HttpRequestHandlerAdapter.java:52) ~[spring-webmvc-6.2.6.jar:6.2.6]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.2.6.jar:6.2.6]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.2.6.jar:6.2.6]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.2.6.jar:6.2.6]
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903) ~[spring-webmvc-6.2.6.jar:6.2.6]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564) ~[tomcat-embed-core-10.1.40.jar:6.0]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.2.6.jar:6.2.6]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.40.jar:6.0]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.2.6.jar:6.2.6]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar:6.2.6]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.2.6.jar:6.2.6]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar:6.2.6]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114) ~[spring-web-6.2.6.jar:6.2.6]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar:6.2.6]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.2.6.jar:6.2.6]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar:6.2.6]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1740) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at java.base/java.lang.Thread.run(Thread.java:840) ~[na:na]
+
+2026-01-04T18:17:21.143+09:00  WARN 6504 --- [http-nio-8080-exec-2] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+2026-01-04T18:17:25.805+09:00 ERROR 6504 --- [http-nio-8080-exec-4] c.t.b.t.e.GlobalExceptionHandler         : Unhandled exception
+
+org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.
+	at org.springframework.web.servlet.resource.ResourceHttpRequestHandler.handleRequest(ResourceHttpRequestHandler.java:585) ~[spring-webmvc-6.2.6.jar:6.2.6]
+	at org.springframework.web.servlet.mvc.HttpRequestHandlerAdapter.handle(HttpRequestHandlerAdapter.java:52) ~[spring-webmvc-6.2.6.jar:6.2.6]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.2.6.jar:6.2.6]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.2.6.jar:6.2.6]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.2.6.jar:6.2.6]
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903) ~[spring-webmvc-6.2.6.jar:6.2.6]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564) ~[tomcat-embed-core-10.1.40.jar:6.0]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.2.6.jar:6.2.6]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.40.jar:6.0]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.2.6.jar:6.2.6]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar:6.2.6]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.2.6.jar:6.2.6]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar:6.2.6]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:114) ~[spring-web-6.2.6.jar:6.2.6]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar:6.2.6]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.2.6.jar:6.2.6]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.6.jar:6.2.6]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:116) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:398) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1740) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1189) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:658) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.40.jar:10.1.40]
+	at java.base/java.lang.Thread.run(Thread.java:840) ~[na:na]
+
+2026-01-04T18:17:25.808+09:00  WARN 6504 --- [http-nio-8080-exec-4] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
