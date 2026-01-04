@@ -7,10 +7,7 @@ import com.tallybot.backend.tallybot_back.dto.FrontMemberDto;
 import com.tallybot.backend.tallybot_back.dto.GroupCreateRequest;
 import com.tallybot.backend.tallybot_back.dto.GroupCreateResponse;
 import com.tallybot.backend.tallybot_back.repository.*;
-// import com.tallybot.backend.tallybot_back.service.*;
 import lombok.RequiredArgsConstructor;
-// import org.slf4j.Logger;
-// import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -23,7 +20,6 @@ public class GroupService {
     private final GroupRepository groupRepository;
     private final MemberRepository memberRepository;
     private final CalculateRepository calculateRepository;
-    // private static final Logger logger = LoggerFactory.getLogger(GroupService.class);
 
 
     public GroupCreateResponse createGroupWithMember(GroupCreateRequest request) {
@@ -64,8 +60,8 @@ public class GroupService {
             .orElseThrow(() -> new NoSuchElementException("Group not found."));
 
             return memberRepository.findByUserGroup(group).stream()
-                .map(m -> new FrontMemberDto(m.getMemberId(), m.getNickname()))
-                .toList();
+            .map(m -> new FrontMemberDto(m.getMemberId(), m.getNickname()))
+            .toList(); 
     }
 
     public List<FrontCalculateDto> getGroupCalculates(Long groupId){

@@ -1,20 +1,15 @@
 package com.tallybot.backend.tallybot_back.service;
 
-//import com.tallybot.backend.tallybot_back.debtopt.Graph;
-// import com.tallybot.backend.tallybot_back.debtopt.Graph;
 import com.tallybot.backend.tallybot_back.domain.*;
 import com.tallybot.backend.tallybot_back.dto.*;
 import com.tallybot.backend.tallybot_back.exception.NoSettlementResultException;
 import com.tallybot.backend.tallybot_back.repository.*;
-// import com.tallybot.backend.tallybot_back.util.DateUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-// import org.h2.value.Transfer;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-// import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -34,7 +29,6 @@ public class CalculateService {
     private final SettlementService settlementService;
     private final ParticipantRepository participantRepository;
     private final OptimizationService optimizationService;
-//     private final MemberRepository memberRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(CalculateService.class);
 
@@ -53,26 +47,8 @@ public class CalculateService {
     @Transactional
     public Long startCalculate(CalculateRequestDto request) {
 
-        logger.info("🍀정산 시작 정상 동작 확인 로그입니다.");
-//        try {
-//
-//            // LocalDateTime -> String 변환 후 처리
-//            String startTimeStr = request.getStartTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
-//            String endTimeStr = request.getEndTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
-//
-//            // DateUtil.parseDate() 사용 (String -> LocalDateTime 변환)
-//            LocalDateTime startDate = DateUtil.parseDate(startTimeStr);
-//            LocalDateTime endDate = DateUtil.parseDate(endTimeStr);
-//
-//
-//            // 처리된 날짜로 계산 시작 로직 수행
-//            logger.info("🍀 정산 시작 요청: groupId={}, startTime={}, endTime={}",
-//                    request.getGroupId(), startDate, endDate);
-//
-//        } catch (Exception e) {
-//            logger.error("❌ 잘못된 입력: {}", e.getMessage());
-//        }
-        logger.info("🍀 정산 시작 요청 데이터: groupId={}, startTime={}, endTime={}",
+        logger.info("정산 시작 정상 동작 확인 로그입니다.");
+        logger.info("정산 시작 요청 데이터: groupId={}, startTime={}, endTime={}",
                 request.getGroupId(), request.getStartTime(), request.getEndTime());
 
         UserGroup userGroup = groupRepository.findById(request.getGroupId())
@@ -88,101 +64,24 @@ public class CalculateService {
         calculate = calculateRepository.save(calculate);
         Long calculateId = calculate.getCalculateId();
 
-//        List<Chat> chats = chatRepository.findByUserGroupAndTimestampBetween(
-//                request.getGroupId(),
-//                request.getStartTime(),
-//                request.getEndTime()
-//        );
-//        List<Chat> chats = chatRepository.findByGroupIdAndTimestampBetween(
-//                request.getGroupId(),  // `groupId` 사용
-//                request.getStartTime(),
-//                request.getEndTime()
-//        );
-
-//        List<Chat> chats = chatRepository.findByUserGroup_GroupIdAndTimestampBetween(
-//                request.getGroupId(),  // groupId 대신 userGroup.id 사용
-//                request.getStartTime(),
-//                request.getEndTime()
-//        );
-
-        //그냥 아이디로 조회 -> 성공 확인함
-//        List<Chat> chats = chatRepository.findByUserGroup_GroupId(
-//                request.getGroupId()  // groupId만 사용하여 조회
-//        );
-
-        // mock 데이터로 startTime과 endTime 설정 -> 성공
-//        LocalDateTime startTime = LocalDateTime.of(2025, 6, 3, 0, 0, 0, 0);  // 2025년 6월 3일 00:00
-//        LocalDateTime endTime = LocalDateTime.of(2025, 6, 4, 23, 59, 59, 999999999);  // 2025년 6월 4일 24:00
-//
-//        List<Chat> chats = chatRepository.findByUserGroup_GroupIdAndTimestampBetween(
-//                request.getGroupId(),
-//                startTime,  // mock startTime
-//                endTime     // mock endTime
-//        );
-
-        // request에서 받은 startTime과 endTime을 LocalDateTime으로 할당 -> 실패
-//        LocalDateTime startTime = request.getStartTime(); // request.getStartTime()은 이미 LocalDateTime일 가능성 있음
-//        LocalDateTime endTime = request.getEndTime();     // request.getEndTime()도 동일
-//
-//        // 이제 startTime과 endTime을 쿼리에서 사용
-//        List<Chat> chats = chatRepository.findByUserGroup_GroupIdAndTimestampBetween(
-//                request.getGroupId(),
-//                startTime,   // startTime 사용
-//                endTime      // endTime 사용
-//        );
-
-        //최종 버전!
-        // int year = request.getStartTime().getYear();
+        int year = request.getStartTime().getYear();
         int month = request.getStartTime().getMonthValue();
         int day = request.getStartTime().getDayOfMonth();
 
         // endTime에서 연, 월, 일 추출
-        // int endYear = request.getEndTime().getYear();
+        int endYear = request.getEndTime().getYear();
         int endMonth = request.getEndTime().getMonthValue();
         int endDay = request.getEndTime().getDayOfMonth();
 
-        // startTime을 00:00:00으로 설정
-//        LocalDateTime startTime = LocalDateTime.of(year, month, day, 0, 0, 0, 0);  // 2025년 6월 3일 00:00
-
-        // endTime을 23:59:59.999999999으로 설정
-//        LocalDateTime endTime = LocalDateTime.of(endYear, endMonth, endDay, 23, 59, 59, 999999999);
-
-        LocalDateTime startTime = LocalDateTime.of(2025, month, day, 0, 0, 0, 0);  // 2025년 6월 3일 00:00
-        LocalDateTime endTime = LocalDateTime.of(2025, endMonth, endDay, 23, 59, 59, 999999999);
-        List<Chat> chats = chatRepository.findByUserGroup_GroupIdAndTimestampBetween(
-                request.getGroupId(),
+        LocalDateTime startTime = LocalDateTime.of(year, month, day, 0, 0, 0, 0);  // 2025년 6월 3일 00:00
+        LocalDateTime endTime = LocalDateTime.of(endYear, endMonth, endDay, 23, 59, 59, 999999999);
+        List<Chat> chats = chatRepository.findByUserGroupAndTimestampBetween(
+                userGroup,
                 startTime,   // startTime 사용
                 endTime      // endTime 사용
         );
 
-//         Chat 객체 생성 시 필요한 UserGroup 및 Member 객체를 생성하여 전달해야 합니다.
-//        UserGroup userGroup1 = groupRepository.findById(request.getGroupId())
-//                .orElseThrow(() -> new IllegalArgumentException("Group not found"));
-//
-//        Member member9 = memberRepository.findById(9L).orElseThrow(() -> new IllegalArgumentException("Member not found"));
-//        Member member10 = memberRepository.findById(10L).orElseThrow(() -> new IllegalArgumentException("Member not found"));
-//        Member member11 = memberRepository.findById(11L).orElseThrow(() -> new IllegalArgumentException("Member not found"));
-//        Member member12 = memberRepository.findById(12L).orElseThrow(() -> new IllegalArgumentException("Member not found"));
-//
-//        List<Chat> chats = new ArrayList<>();
-//
-//        // 예시로 setter를 사용하여 설정
-//
-//        chats.add(new Chat(1L, userGroup, LocalDateTime.of(2025, 6, 3, 18, 0, 0), member9, "오늘 재밌었다!!!"));
-//        chats.add(new Chat(2L, userGroup, LocalDateTime.of(2025, 6, 3, 18, 1, 0), member9, "삼겹살 진짜 맛있었당"));
-//        chats.add(new Chat(3L, userGroup, LocalDateTime.of(2025, 6, 3, 18, 2, 0), member10, "그니까 조심히 들어가~~"));
-//        chats.add(new Chat(4L, userGroup, LocalDateTime.of(2025, 6, 3, 18, 3, 0), member11, "카페도 커피랑 케잌 다 맛있더라"));
-//        chats.add(new Chat(5L, userGroup, LocalDateTime.of(2025, 6, 3, 18, 4, 0), member9, "그니까! 삼겹살 내가 이따 정산할게"));
-//        chats.add(new Chat(6L, userGroup, LocalDateTime.of(2025, 6, 3, 18, 5, 0), member12, "카페는 정산 잠시만..."));
-//        chats.add(new Chat(7L, userGroup, LocalDateTime.of(2025, 6, 3, 18, 6, 0), member12, "카페 2만 3천원"));
-//        chats.add(new Chat(8L, userGroup, LocalDateTime.of(2025, 6, 3, 18, 7, 0), member11, "어 생각보다 별로 안 나왔네"));
-//        chats.add(new Chat(9L, userGroup, LocalDateTime.of(2025, 6, 3, 18, 8, 0), member12, "어어 이다빈 빼고 1/3씩 보내줘"));
-//        chats.add(new Chat(10L, userGroup, LocalDateTime.of(2025, 6, 3, 18, 9, 0), member9, "삼겹살 총 8만 천원!"));
-//        chats.add(new Chat(11L, userGroup, LocalDateTime.of(2025, 6, 3, 18, 10, 0), member9, "내가 2만 천원 낸 걸로 하고 2만원씩 보내줘!"));
-//        chats.add(new Chat(12L, userGroup, LocalDateTime.of(2025, 6, 3, 18, 11, 0), member11, "멘토님 선물은 2만 2천인데"));
-//        chats.add(new Chat(13L, userGroup, LocalDateTime.of(2025, 6, 3, 18, 12, 0), member11, "내가 만원 상품권으로 냈고 나머지는 n분의 1 하자!"));
-
-        logger.info("🍀 calculate에서 조회된 채팅 수: {}", chats.size());
+        logger.info("calculate에서 조회된 채팅 수: {}", chats.size());
 
 
         // 나머지 GPT 처리 로직은 비동기로 실행
@@ -200,7 +99,7 @@ public class CalculateService {
                 ))
                 .toList();
 
-        logger.info("🍀 calculate 채팅 수: {}", chatDtos.size());
+        logger.info("calculate 채팅 수: {}", chatDtos.size());
 
         CompletableFuture.runAsync(() -> {
             try {
@@ -222,12 +121,11 @@ public class CalculateService {
 
             } catch (NoSettlementResultException ex) {
                 calculateRepository.deleteById(finalCalculateId);
-                System.err.println("정산 결과 없음 - calculate 삭제됨: " + ex.getMessage());
+                logger.error("정산 결과 없음 - calculateId={}", finalCalculateId, ex);
                 return;
             } catch (Exception ex) {
                 calculateRepository.deleteById(finalCalculateId);
-                System.err.println("GPT 처리 중 오류 발생 - calculate 삭제됨: " + ex.getMessage());
-//                ex.printStackTrace();
+                logger.error("GPT 처리 중 오류 발생 - calculate 삭제됨: ", finalCalculateId, ex);
                 return;
             }
         });
@@ -253,7 +151,6 @@ public class CalculateService {
         calculateDetailRepository.deleteByCalculate(calculate);
 
         // 2. Settlement는 유지하고, 내부 계산만 다시 진행
-//        List<Settlement> settlementList = settlementRepository.findByCalculate(calculate);
         List<Settlement> settlementList = settlementRepository.findByCalculateWithParticipants(calculate);
 
 
@@ -296,7 +193,6 @@ public class CalculateService {
             }
 
             // 남은 금액을 각 비율로 나눈다.
-        //     final int finalAmount = amount;
             for (Participant pc : s.getParticipants()) {
                 Pair<Member, Member> p = Pair.of(s.getPayer(), pc.getParticipantKey().getMember());
 
@@ -318,46 +214,6 @@ public class CalculateService {
         return lcd;
     }
 
-    /*
-     * 그래프 간소화를 이용하여 산정된 정산 몫을 최적화한다.
-     */
-//    public List<CalculateDetail> optimize(List<CalculateDetail> lcd) {
-//        // 그래프 형태로 만든다.
-//        Set<Member> members = new HashSet<>();
-//        Calculate calculate = lcd.get(0).getCalculate();
-//        for(CalculateDetail cd: lcd) {
-//            members.add(cd.getPayer());
-//            members.add(cd.getPayee());
-//        }
-//
-//        // index compression
-//        List<Member> memberList = members.stream().toList();
-//        Graph graph = new Graph(memberList.size());
-//        for(CalculateDetail cd: lcd) {
-//            int payerNum = memberList.indexOf(cd.getPayer());
-//            int payeeNum = memberList.indexOf(cd.getPayee());
-//            graph.addEdge(payerNum, payeeNum, cd.getAmount());
-//        }
-//
-//        // 그래프 간소화를 실현하되, 그것이 오히려 간선을 늘리는 경우 원복한다.
-//        Graph graph2 = Graph.summarize(graph);
-//        if(graph2.getEdgeCount() < graph.getEdgeCount()) {
-//            graph = graph2;
-//        }
-//
-//        // 그래프 형태를 되돌린다.
-//        List<CalculateDetail> lcd2 = new ArrayList<>();
-//        for(int i = 0; i < graph.getVertexCount(); i++) {
-//            for(Integer j: graph.getAdjacencyList().get(i).keySet()) {
-//                if(graph.getAdjacencyList().get(i).get(j) < 0) continue;
-//                lcd2.add(new CalculateDetail(null, calculate, memberList.get(i), memberList.get(j),
-//                        graph.getAdjacencyList().get(i).get(j)));
-//            }
-//        }
-//
-//        return lcd2;
-//    }
-
 
     public BotResponseDto botResultReturn(Calculate calculate) {
         Long groupId = calculate.getUserGroup().getGroupId();
@@ -378,105 +234,6 @@ public class CalculateService {
 
         return new BotResponseDto(groupUrl, calculateUrl, transfers);
     }
-
-    /*
-     * Calculate ID에 따라 정산 계산된 payer-payee 간
-     * 금전 거래 관계를 CalculateDetail울 Response 형태로 반환한다.
-     */
-//    public ResponseDetailDto resultReturn(Long calculateId) {
-//        Calculate calculate = calculateRepository.findById(calculateId)
-//                .orElseThrow(() -> new IllegalArgumentException("정산 없음"));
-//
-//        List<CalculateDetail> details = calculateDetailRepository.findByCalculate(calculate);
-//
-//        List<ResponseDetail> detailResponses = details.stream().map(detail ->
-//                new ResponseDetail(
-//                        detail.getPayer().getNickname(),
-//                        detail.getPayee().getNickname(),
-//                        detail.getAmount()
-//                )
-//        ).toList();
-//
-//        String url = "https://tallybot.me/calculate/" + calculateId;
-//
-//        return new ResponseDetailDto(url, detailResponses);
-//    }
-//
-//    /*
-//     * Calculate ID에 따라 정산 계산된 각 item을 Response 형태로 반환한다.
-//     */
-//    public ResponseBriefSettlementDto resultBriefSettlementReturn(Long calculateId) {
-//        Calculate calculate = calculateRepository.findById(calculateId)
-//                .orElseThrow(() -> new IllegalArgumentException("정산 없음"));
-//
-//        List<Settlement> settlements = settlementRepository.findByCalculate(calculate);
-//
-//        List<ResponseBriefSettlement> settlementResponses = settlements.stream().map(settlement -> {
-//            List<String> nicks = settlementService.nicknamesInCalculate(settlements);
-//            return new ResponseBriefSettlement(
-//                    settlement.getSettlementId(),
-//                    settlement.getPlace(),
-//                    settlement.getPayer().getNickname(),
-//                    nicks.size(),
-//                    settlement.getAmount(),
-//                    nicks
-//            );
-//        }).toList();
-//
-//        String url = "https://tallybot.me/settlement/brief/" + calculateId;
-//
-//        return new ResponseBriefSettlementDto(url, settlementResponses);
-//    }
-//
-//    /*
-//     * Calculate ID에 따라 각자의 정산 비율 등을 포함한 결제의 자세한 정보를 Response 형태로 반환한다.
-//     */
-//    public ResponseSettlementDto resultSettlementReturn(Long calculateId) {
-//        Calculate calculate = calculateRepository.findById(calculateId)
-//                .orElseThrow(() -> new IllegalArgumentException("정산 없음"));
-//
-//        List<Settlement> settlements = settlementRepository.findByCalculate(calculate);
-//
-//        List<SettlementDto> settlementDtoResponses = settlements.stream().map(settlement -> {
-//            int denom = settlement.getParticipants().stream().map(Participant::getRatio).map(Ratio::getDenominator).reduce(1,
-//                    (a, b) -> a * b / Ratio.gcd(a, b));
-//            return new SettlementDto(
-//                    settlement.getPlace(),
-//                    settlement.getPayer().getNickname(),
-//                    settlement.getItem(),
-//                    settlement.getAmount(),
-//                    settlement.getParticipants().stream().map(participant -> {
-//                        return participant.getParticipantKey().member.getNickname();
-//                    }).toList(),
-//                    settlement.getParticipants().stream().collect(Collectors.toMap(
-//                            participant -> participant.getParticipantKey().member.getNickname(),
-//                            Participant::getConstant)),
-//                    settlement.getParticipants().stream().collect(Collectors.toMap(
-//                            participant -> ((Participant) participant).getParticipantKey().member.getNickname(),
-//                            participant -> Ratio.mul(((Participant) participant).getRatio(), new Ratio(denom, 1)).toInt()))
-//            );
-//        }).toList();
-//
-//        String url = "https://tallybot.me/settlement/detail" + calculateId;
-//
-//        return new ResponseSettlementDto(url, settlementDtoResponses);
-//    }
-//
-//    @Transactional
-//    public void recalculate(Long calculateId) {
-//        Calculate calculate = calculateRepository.findById(calculateId)
-//                .orElseThrow(() -> new IllegalArgumentException("정산 없음"));
-//
-//        // 기존 결과 삭제
-//        calculateDetailRepository.deleteByCalculate(calculate);
-//
-//        // 재분석 없이 프론트에서 전달된 수정 사항만 settlement에 업데이트 (예: 정산 대상자, 금액 등)
-//
-//        // 웹에서 수정 시 item: value, amount: value 형식으로 들어오니 GPT 추가로 돌리지 않고
-//        // 내부 함수만 돌리는 코드 작성 필요
-//
-//        // 상태는 그대로 유지 (PENDING or COMPLETED)
-//    }
 
 
 }

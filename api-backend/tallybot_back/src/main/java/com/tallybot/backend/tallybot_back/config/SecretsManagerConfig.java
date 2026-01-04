@@ -17,7 +17,7 @@ import javax.sql.DataSource;
 
 @Slf4j
 @Configuration
-@Profile({"rds", "prod"}) // RDS 사용하는 프로파일에서만 활성화
+@Profile({"rds"}) // RDS 사용하는 프로파일에서만 활성화
 public class SecretsManagerConfig {
 
     @Value("${aws.secrets.db-secret-name:tallybot-test-db}")

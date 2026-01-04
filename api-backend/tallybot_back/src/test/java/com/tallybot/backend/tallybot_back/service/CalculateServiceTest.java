@@ -2,31 +2,31 @@ package com.tallybot.backend.tallybot_back.service;
 
 import com.tallybot.backend.tallybot_back.domain.*;
 import com.tallybot.backend.tallybot_back.dto.*;
+import com.tallybot.backend.tallybot_back.exception.NoSettlementResultException;
 import com.tallybot.backend.tallybot_back.repository.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import com.tallybot.backend.tallybot_back.exception.NoSettlementResultException;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@ActiveProfiles("mock-data") // 이 프로파일 조합으로 별도 컨텍스트 생성
+@ActiveProfiles("mock-data")
 class CalculateServiceTest {
-
 
     @InjectMocks
     private CalculateService calculateService;
@@ -39,24 +39,11 @@ class CalculateServiceTest {
     @Mock private SettlementRepository settlementRepository;
     @Mock private SettlementService settlementService;
     @Mock private ParticipantRepository participantRepository;
+    @Mock private OptimizationService optimizationService; 
 
 
     @Test
-    void groupExists_true() {
-        when(groupRepository.existsById(1L)).thenReturn(true);
-        boolean result = calculateService.groupExists(1L);
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    void groupExists_false() {
-        when(groupRepository.existsById(999L)).thenReturn(false);
-        boolean result = calculateService.groupExists(999L);
-        assertThat(result).isFalse();
-    }
-
-
-    @Test
+    @DisplayName("startCalculate(): GPT 정상 결과 → settlement 저장/participant 저장/최적화/pending")
     void startCalculate_shouldProcessSuccessfully_whenGptReturnsResults() {
         // given
         Long groupId = 1L;
@@ -65,60 +52,62 @@ class CalculateServiceTest {
         request.setStartTime(LocalDateTime.now().minusDays(1));
         request.setEndTime(LocalDateTime.now());
 
-        UserGroup mockGroup = UserGroup.create(1L, "치킨모임");
-        Calculate savedCalculate = new Calculate();
-        Calculate saved = calculateRepository.save(savedCalculate);
-        Long fakeCalculateId = saved.getCalculateId();
+        UserGroup mockGroup = UserGroup.create(groupId, "치킨모임");
 
+        // calculateRepository.save() 호출 시 calculateId를 부여해서 반환
+        when(calculateRepository.save(any(Calculate.class))).thenAnswer(inv -> {
+            Calculate c = inv.getArgument(0);
+            if (getFieldValue(c, "calculateId") == null) {
+                setFieldValue(c, "calculateId", 100L);
+            }
+            return c;
+        });
+
+        // pendingCalculate()에서 findById 필요
+        when(calculateRepository.findById(100L)).thenAnswer(inv -> {
+            Calculate c = new Calculate();
+            setFieldValue(c, "calculateId", 100L);
+            return Optional.of(c);
+        });
+
+        when(groupRepository.findById(groupId)).thenReturn(Optional.of(mockGroup));
 
         List<Chat> chats = List.of(createChat("A", "샘플 대화"));
-
-        List<ChatForGptDto> chatDtos = chats.stream()
-                .map(chat -> new ChatForGptDto(
-                        chat.getChatId(),
-                        chat.getMember().getMemberId(),
-                        chat.getMember().getNickname(),
-                        chat.getMessage(),
-                        chat.getTimestamp()
-                ))
-                .toList();  
-         
-        
-            
-        SettlementDto dummyDto = new SettlementDto(); // 내용은 필요시 설정
-        List<SettlementDto> gptResults = List.of(dummyDto);
-
-        Participant dummyParticipant = new Participant();
-        Participant.ParticipantKey participantKey = new Participant.ParticipantKey();
-        dummyParticipant.setParticipantKey(participantKey);
-
-        Settlement dummySettlement = new Settlement();
-        dummySettlement.addParticipant(dummyParticipant);
-
-        List<Settlement> settlements = List.of(dummySettlement);
-
-        // mocking
-        when(groupRepository.findById(groupId)).thenReturn(Optional.of(mockGroup));
-        when(calculateRepository.save(any(Calculate.class))).thenReturn(savedCalculate);
         when(chatRepository.findByUserGroupAndTimestampBetween(any(), any(), any())).thenReturn(chats);
-        when(gptService.returnResults(groupId, chatDtos)).thenReturn(gptResults);
-        when(settlementService.toSettlements(gptResults, fakeCalculateId)).thenReturn(settlements);
-        when(settlementRepository.save(any(Settlement.class))).thenReturn(dummySettlement);
+
+        List<SettlementDto> gptResults = List.of(new SettlementDto());
+        when(gptService.returnResults(eq(groupId), anyList())).thenReturn(gptResults);
+
+        // settlement & participant 준비
+        Member payee = chats.get(0).getMember();
+        Settlement dummySettlement = mock(Settlement.class);
+
+        Participant.ParticipantKey pk = new Participant.ParticipantKey(null, payee);
+        Participant dummyParticipant = new Participant(pk, 0, new Ratio(1, 1));
+
+        // getParticipants()는 Set일 가능성이 높아서 Set으로 반환
+        when(dummySettlement.getParticipants()).thenReturn(Set.of(dummyParticipant));
+
+        when(settlementService.toSettlements(eq(gptResults), eq(100L))).thenReturn(List.of(dummySettlement));
+
+        when(settlementRepository.save(any(Settlement.class))).thenAnswer(inv -> inv.getArgument(0));
 
         // when
         Long returnedId = calculateService.startCalculate(request);
 
-        // then: 비동기 작업이 모두 끝날 때까지 기다림
-        await().atMost(2, TimeUnit.SECONDS).untilAsserted(() -> {
+        // then (비동기 완료 대기)
+        await().atMost(3, TimeUnit.SECONDS).untilAsserted(() -> {
             verify(settlementRepository, times(1)).save(any(Settlement.class));
             verify(participantRepository, times(1)).save(any(Participant.class));
+            verify(optimizationService, times(1)).calculateAndOptimize(anyList());
+            verify(calculateRepository, atLeastOnce()).save(any(Calculate.class)); // pending에서 save
         });
 
-        assertEquals(fakeCalculateId, returnedId);
+        assertEquals(100L, returnedId);
     }
 
-
     @Test
+    @DisplayName("startCalculate(): 정산 결과 없음 → calculate 삭제")
     void startCalculate_shouldDeleteCalculate_whenNoSettlementResult() {
         // given
         Long groupId = 1L;
@@ -127,38 +116,34 @@ class CalculateServiceTest {
         request.setStartTime(LocalDateTime.now().minusDays(1));
         request.setEndTime(LocalDateTime.now());
 
-        UserGroup mockGroup = UserGroup.create(1L, "치킨모임");
-        Calculate savedCalculate = new Calculate();
-        Calculate saved = calculateRepository.save(savedCalculate);
-        Long fakeCalculateId = saved.getCalculateId();
+        UserGroup mockGroup = UserGroup.create(groupId, "치킨모임");
+
+        when(groupRepository.findById(groupId)).thenReturn(Optional.of(mockGroup));
+
+        when(calculateRepository.save(any(Calculate.class))).thenAnswer(inv -> {
+            Calculate c = inv.getArgument(0);
+            setFieldValue(c, "calculateId", 200L);
+            return c;
+        });
 
         List<Chat> chats = List.of(createChat("A", "샘플 대화"));
-
-        List<ChatForGptDto> chatDtos = chats.stream()
-                .map(chat -> new ChatForGptDto(
-                        chat.getChatId(),
-                        chat.getMember().getMemberId(),
-                        chat.getMember().getNickname(),
-                        chat.getMessage(),
-                        chat.getTimestamp()
-                ))
-                .toList();
-
-        // mocking
-        when(groupRepository.findById(groupId)).thenReturn(Optional.of(mockGroup));
-        when(calculateRepository.save(any(Calculate.class))).thenReturn(savedCalculate);
         when(chatRepository.findByUserGroupAndTimestampBetween(any(), any(), any())).thenReturn(chats);
-        when(gptService.returnResults(groupId, chatDtos)).thenThrow(new NoSettlementResultException("정산 결과 없음"));
+
+        when(gptService.returnResults(eq(groupId), anyList()))
+                .thenThrow(new NoSettlementResultException("정산 결과 없음"));
 
         // when
         Long returnedId = calculateService.startCalculate(request);
 
-        // then: 비동기 작업이 deleteById 호출할 때까지 기다림
-        await().atMost(2, TimeUnit.SECONDS).untilAsserted(() -> {
-            verify(calculateRepository, times(1)).deleteById(fakeCalculateId);
+        // then
+        await().atMost(3, TimeUnit.SECONDS).untilAsserted(() -> {
+            verify(calculateRepository, times(1)).deleteById(200L);
+            verify(settlementRepository, never()).save(any());
+            verify(participantRepository, never()).save(any());
+            verify(optimizationService, never()).calculateAndOptimize(anyList());
         });
 
-        assertEquals(fakeCalculateId, returnedId);
+        assertEquals(200L, returnedId);
     }
 
     private Chat createChat(String nickname, String message) {
@@ -169,144 +154,116 @@ class CalculateServiceTest {
         Chat chat = Chat.builder()
                 .member(member)
                 .message(message)
+                .timestamp(LocalDateTime.now())
                 .build();
         return chat;
     }
 
-
     @Test
-    @DisplayName("recalculate(): 기존 Settlement로 재정산 처리")
+    @DisplayName("recalculate(): 기존 Settlement 기반 재정산 처리")
     void recalculate_success() {
         // given
+        Long calculateId = 300L;
+
         Calculate calculate = new Calculate();
-        Calculate saved = calculateRepository.save(calculate);
-        Long calculateId = saved.getCalculateId();
+        setFieldValue(calculate, "calculateId", calculateId);
 
-        Member payer = Member.builder()
-                .build();
-        Member payee = Member.builder()
-                .build();
-
-        Settlement settlement = Settlement.create(
-                UserGroup.create(1L, "치킨모임");,
-                payer,
-                calculate,
-                "",
-                "",
-                10000
-        );
-
-        Participant.ParticipantKey pk = new Participant.ParticipantKey(settlement, payee);
-        Participant participant = new Participant(pk, 0, new Ratio(1, 1));
-        settlement.addParticipant(participant);
-
-        // 👉 calculateRepository는 2번 호출되므로 둘 다 처리
-        when(calculateRepository.findByCalculateId(calculateId)).thenReturn(Optional.of(calculate));
         when(calculateRepository.findById(calculateId)).thenReturn(Optional.of(calculate));
-        when(settlementRepository.findByCalculate(calculate)).thenReturn(List.of(settlement));
+
+        Settlement settlement = mock(Settlement.class);
+
+        when(settlementRepository.findByCalculateWithParticipants(calculate)).thenReturn(List.of(settlement));
 
         // when
         calculateService.recalculate(calculateId);
 
         // then
-        verify(calculateDetailRepository).saveAll(any());
+        verify(calculateDetailRepository, times(1)).deleteByCalculate(calculate);
+        verify(settlementRepository, times(1)).findByCalculateWithParticipants(calculate);
+        verify(optimizationService, times(1)).calculateAndOptimize(anyList());
+        verify(calculateRepository, times(1)).save(calculate);
     }
-
 
     @Test
-    @DisplayName("calculateAndOptimize(): 정산 → 최적화 → 저장까지 정상 수행")
+    @DisplayName("calculateAndOptimize(): OptimizationService 위임")
     void calculateAndOptimize_success() {
-        // given
-        UserGroup userGroup = new UserGroup();
-        Member m1 = Member.builder()
-                .userGroup(userGroup)
-                .build();
-        Member m2 = Member.builder()
-                .userGroup(userGroup)
-                .build();
+        Settlement s = mock(Settlement.class);
 
-        Calculate calculate = Calculate.builder()
-            .userGroup(userGroup)
-            .build();
-
-        // Calculate saved = calculateRepository.save(calculate);
-        // Long calculateId = saved.getCalculateId();
-
-        // 정산 1건
-        Settlement s = Settlement.create(
-                userGroup,
-                m1,
-                calculate,
-                "",
-                "",
-                10000
-        );
-
-        Participant.ParticipantKey pk = new Participant.ParticipantKey(s, m2);
-        Participant participant = new Participant(pk, 0, new Ratio(1, 1));
-        s.addParticipant(participant);
-
-        // when
         calculateService.calculateAndOptimize(List.of(s));
 
-        // then
-        verify(calculateDetailRepository).saveAll(any());
+        verify(optimizationService, times(1)).calculateAndOptimize(anyList());
+        verifyNoInteractions(calculateDetailRepository); // 서비스는 saveAll 안함
     }
-
-
 
     @Test
     @DisplayName("botResultReturn(): 정산 결과 DTO 정상 반환")
     void botResultReturn_success() {
         // given
-        UserGroup userGroup = new UserGroup();
-        userGroup.setGroupId(42L);
+        UserGroup userGroup = UserGroup.create(42L, "치킨모임");
 
         Calculate calculate = Calculate.builder()
-            .userGroup(userGroup)
-            .build();
-        Calculate saved = calculateRepository.save(calculate);
-        Long calculateId = saved.getCalculateId();
+                .userGroup(userGroup)
+                .build();
+        setFieldValue(calculate, "calculateId", 999L);
 
-        Member payer1 = Member.builder()
-                .build();
-        Member payee1 = Member.builder()
-                .build();
-
-        Member payer2 = Member.builder()
-                .build();
-        Member payee2 = Member.builder()
-                .build();
+        Member payer1 = Member.builder().build();
+        setFieldValue(payer1, "memberId", 1L);
+        Member payee1 = Member.builder().build();
+        setFieldValue(payee1, "memberId", 2L);
 
         CalculateDetail detail1 = CalculateDetail.builder()
-            .calculate(calculate)
-            .payer(payer1)
-            .payee(payee1)
-            .amount(12000)
-            .build();
-
-        CalculateDetail detail2 = CalculateDetail.builder()
-            .calculate(calculate)
-            .payer(payer2)
-            .payee(payee2)
-            .amount(8000)
-            .build();
+                .calculate(calculate)
+                .payer(payer1)
+                .payee(payee1)
+                .amount(12000)
+                .build();
 
         when(calculateDetailRepository.findAllByCalculate(calculate))
-                .thenReturn(List.of(detail1, detail2));
+                .thenReturn(List.of(detail1));
 
         // when
         BotResponseDto result = calculateService.botResultReturn(calculate);
 
-        // then
-        assertThat(result.getGroupUrl()).isEqualTo("https://tallybot.me/42");
-        assertThat(result.getCalculateUrl()).isEqualTo("https://tallybot.me/42/"+calculateId);
+        //then
+        assertThat(result.getGroupUrl()).isEqualTo("https://tallybot.vercel.app/42");
+        assertThat(result.getCalculateUrl()).isEqualTo("https://tallybot.vercel.app/42/settlements/999");
 
         List<TransferDto> transfers = result.getTransfers();
-        assertThat(transfers).hasSize(2);
-        assertThat(transfers.get(0).getPayerId()).isEqualTo(payer1.getMemberId());
-        assertThat(transfers.get(0).getPayeeId()).isEqualTo(payee1.getMemberId());
+        assertThat(transfers).hasSize(1);
+        assertThat(transfers.get(0).getPayerId()).isEqualTo(1L);
+        assertThat(transfers.get(0).getPayeeId()).isEqualTo(2L);
         assertThat(transfers.get(0).getAmount()).isEqualTo(12000);
     }
 
+    private static void setFieldValue(Object target, String fieldName, Object value) {
+        try {
+            Field f = findField(target.getClass(), fieldName);
+            f.setAccessible(true);
+            f.set(target, value);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to set field: " + fieldName + " on " + target.getClass(), e);
+        }
+    }
+
+    private static Object getFieldValue(Object target, String fieldName) {
+        try {
+            Field f = findField(target.getClass(), fieldName);
+            f.setAccessible(true);
+            return f.get(target);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static Field findField(Class<?> type, String fieldName) throws NoSuchFieldException {
+        Class<?> cur = type;
+        while (cur != null) {
+            try {
+                return cur.getDeclaredField(fieldName);
+            } catch (NoSuchFieldException ignored) {
+                cur = cur.getSuperclass();
+            }
+        }
+        throw new NoSuchFieldException(fieldName);
+    }
 }

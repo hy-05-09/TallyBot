@@ -10,12 +10,20 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.HandlerMethodValidationException;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    
+    @ExceptionHandler(ResponseStatusException.class)
+    public ResponseEntity<Map<String, String>> handleRse(ResponseStatusException e) {
+        return ResponseEntity.status(e.getStatusCode())
+                .body(Map.of("error", e.getReason()));
+    }
 
     /// 유효성 검사 실패했을 때 호출 -> 400 Bad Request
     @ExceptionHandler(MethodArgumentNotValidException.class)

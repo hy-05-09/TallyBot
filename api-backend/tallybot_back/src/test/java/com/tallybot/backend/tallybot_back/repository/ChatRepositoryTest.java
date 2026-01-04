@@ -28,6 +28,7 @@ import java.util.List;
 @Transactional
 @Rollback
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@Tag("slow")
 class ChatRepositoryTest extends DatabaseTestBase {
 
     @Autowired
@@ -86,29 +87,17 @@ class ChatRepositoryTest extends DatabaseTestBase {
             userGroupMembers.add(new ArrayList<>());
         }
 
-        UserGroup group = UserGroup.builder()
-                .groupId(8810L)
-                .groupName("새로운 톡방")
-                .build();
+        UserGroup group = UserGroup.create(8810L,"새로운 톡방");
 
         userGroups.set(0, groupRepository.save(group));
 
-        group = UserGroup.builder()
-                .groupId(4042L)
-                .groupName("2019 17기 Withme")
-                .build();
-
+        group = UserGroup.create(4042L,"2019 17기 Withme");
         userGroups.set(1, groupRepository.save(group));
 
-        group = UserGroup.builder()
-                .groupId(1194L)
-                .groupName("삼겹살 번개모임")
-                .build();
-
+        group = UserGroup.create(1194L,"삼겹살 번개모임");
         userGroups.set(2, groupRepository.save(group));
 
         Member member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(0))
                 .nickname("철수")
                 .build();
@@ -116,7 +105,6 @@ class ChatRepositoryTest extends DatabaseTestBase {
         userGroupMembers.get(0).add(memberRepository.save(member));
 
         member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(0))
                 .nickname("영희")
                 .build();
@@ -124,7 +112,6 @@ class ChatRepositoryTest extends DatabaseTestBase {
         userGroupMembers.get(0).add(memberRepository.save(member));
 
         member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(1))
                 .nickname("철수")
                 .build();
@@ -132,7 +119,6 @@ class ChatRepositoryTest extends DatabaseTestBase {
         userGroupMembers.get(1).add(memberRepository.save(member));
 
         member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(2))
                 .nickname("민재")
                 .build();
@@ -140,7 +126,6 @@ class ChatRepositoryTest extends DatabaseTestBase {
         userGroupMembers.get(2).add(memberRepository.save(member));
 
         member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(1))
                 .nickname("민경")
                 .build();
@@ -148,7 +133,6 @@ class ChatRepositoryTest extends DatabaseTestBase {
         userGroupMembers.get(1).add(memberRepository.save(member));
 
         member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(2))
                 .nickname("현주")
                 .build();
@@ -156,7 +140,6 @@ class ChatRepositoryTest extends DatabaseTestBase {
         userGroupMembers.get(2).add(memberRepository.save(member));
 
         member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(1))
                 .nickname("정현")
                 .build();

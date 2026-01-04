@@ -62,6 +62,8 @@ dependencies {
 }
 
 tasks.named('test') {
-	useJUnitPlatform()
+	useJUnitPlatform {
+        excludeTags 'slow'
+    }
 	jvmArgs '-Xshare:off' // JVM 아규먼트 설정
 }

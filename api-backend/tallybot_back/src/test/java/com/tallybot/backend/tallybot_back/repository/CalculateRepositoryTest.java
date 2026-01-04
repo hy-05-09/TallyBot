@@ -26,6 +26,7 @@ import java.util.Optional;
 @Transactional
 @Rollback
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@Tag("slow")
 class CalculateRepositoryTest extends DatabaseTestBase {
 
     @Autowired
@@ -131,12 +132,12 @@ class CalculateRepositoryTest extends DatabaseTestBase {
 
         List<Calculate> all = calculateRepository.findAll();
 
-        Optional<Calculate> cid0 = calculateRepository.findByCalculateId(cal0.getCalculateId());
-        Optional<Calculate> cid1 = calculateRepository.findByCalculateId(cal1.getCalculateId());
-        Optional<Calculate> cid2 = calculateRepository.findByCalculateId(cal2.getCalculateId());
-        Optional<Calculate> cid3 = calculateRepository.findByCalculateId(cal3.getCalculateId());
-        Optional<Calculate> cid4 = calculateRepository.findByCalculateId(cal4.getCalculateId());
-        Optional<Calculate> cidNo = calculateRepository.findByCalculateId(cal4.getCalculateId() + 1);
+        Optional<Calculate> cid0 = calculateRepository.findById(cal0.getCalculateId());
+        Optional<Calculate> cid1 = calculateRepository.findById(cal1.getCalculateId());
+        Optional<Calculate> cid2 = calculateRepository.findById(cal2.getCalculateId());
+        Optional<Calculate> cid3 = calculateRepository.findById(cal3.getCalculateId());
+        Optional<Calculate> cid4 = calculateRepository.findById(cal4.getCalculateId());
+        Optional<Calculate> cidNo = calculateRepository.findById(cal4.getCalculateId() + 1);
 
         // then
         assertThat(cnt0).isEqualTo(2);

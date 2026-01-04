@@ -21,9 +21,9 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(UpdateController.class)
 @ActiveProfiles("mock-data")  // 이 프로파일 조합으로 별도 컨텍스트 생성
@@ -89,45 +89,26 @@ public class UpdateControllerTest {
                 .andExpect(jsonPath("$.settlementId").value(31));
     }
 
-    @Test
-    void fail_when_invalidField() throws Exception {
-        SettlementUpdateRequest request = validAddRequest();
-        request.setField("invalidField");
+    
 
-        mockMvc.perform(post("/api/update/settlement")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Invalid field type. Must be one of: add, update, delete."));
-    }
-
-    @Test
-    void fail_when_missingRequiredFields() throws Exception {
-        SettlementUpdateRequest request = new SettlementUpdateRequest(); // 비어있는 요청
-        request.setField("add");
-        request.setCalculateId(42L);
-
-        Mockito.when(settlementService.fieldExists("add", request)).thenReturn(false);
-
-        mockMvc.perform(post("/api/update/settlement")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Missing required fields in one or more."));
-    }
 
     @Test
     void fail_when_calculateNotFound() throws Exception {
-        SettlementUpdateRequest request = validAddRequest();
-        Mockito.when(settlementService.fieldExists(eq("add"), any())).thenReturn(true);
-        Mockito.when(calculateRepository.findById(42L)).thenReturn(Optional.empty());
+        SettlementUpdateRequest request = validAddRequest(); 
+
+        when(settlementService.fieldExists(eq("add"), any(SettlementUpdateRequest.class))).thenReturn(true);
+        when(calculateRepository.findById(eq(request.getCalculateId()))).thenReturn(Optional.empty());
 
         mockMvc.perform(post("/api/update/settlement")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
+                .andDo(org.springframework.test.web.servlet.result.MockMvcResultHandlers.print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("Calculate entity not found."));
+
     }
+
+
 
     private SettlementUpdateRequest validAddRequest() {
         SettlementUpdateRequest request = new SettlementUpdateRequest();

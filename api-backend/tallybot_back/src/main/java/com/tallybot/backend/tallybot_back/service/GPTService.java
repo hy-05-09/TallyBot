@@ -55,32 +55,11 @@ public class GPTService {
         //테스트용 mock 주소
 //        String url = "http://localhost:8080/api/process";
 
-        logger.info("🍀 gptservice에서 조회된 채팅 수: {}", chatDtos.size());
+        logger.info("gptservice에서 조회된 채팅 수: {}", chatDtos.size());
         try {
             ObjectMapper mapper = new ObjectMapper();
             String requestJson = mapper.writeValueAsString(requestDto);
-            System.out.println("📤 GPT 요청 JSON:\n" + requestJson);
-            logger.info("🍀 GPT 요청 JSON:\n" + requestJson);
-
-//            ResponseEntity<SettlementDto[]> response = restTemplate.postForEntity(
-//                    url,
-//                    requestDto,
-//                    SettlementDto[].class
-//            );
-//
-//            SettlementDto[] responseBody = response.getBody();
-//            if (responseBody == null || responseBody.length == 0) {
-//                throw new NoSettlementResultException("정산 결과가 존재하지 않습니다.");
-//            }
-//
-//            return Arrays.asList(responseBody);
-
-
-            // 디버깅 시 임시로 응답 확인
-//            ResponseEntity<String> rawResponse = restTemplate.postForEntity(url, requestDto, String.class);
-//            System.out.println("❤️GPT 응답 (raw):\n" + rawResponse.getBody());
-//            logger.info("🍀GPT 응답 (raw):\n" + rawResponse.getBody());
-
+            logger.info("GPT 요청 JSON:\n" + requestJson);
             ResponseEntity<SettlementResponseWrapper> response = restTemplate.postForEntity(
                     url,
                     requestDto,
@@ -99,18 +78,10 @@ public class GPTService {
         } catch (NoSettlementResultException e) {
             throw e;
         } catch (Exception e) {
-            System.err.println("GPT 요청 실패: " + e.getMessage());
             throw new RuntimeException("GPT 서버 응답 처리 중 오류가 발생했습니다.", e);
         }
     }
 
 
 
-    // private String createSystemMessage(List<Chat> chats) {
-    //     Set<String> memberNames = chats.stream()
-    //             .map(chat -> chat.getMember().getNickname())
-    //             .collect(Collectors.toSet());
-
-    //     return "members: " + memberNames + "\nmember_count: " + memberNames.size();
-    // }
 }

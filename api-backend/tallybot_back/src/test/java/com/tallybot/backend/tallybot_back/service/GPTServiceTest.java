@@ -1,33 +1,29 @@
 package com.tallybot.backend.tallybot_back.service;
 
-import com.tallybot.backend.tallybot_back.domain.Chat;
-import com.tallybot.backend.tallybot_back.domain.Member;
-import com.tallybot.backend.tallybot_back.repository.*;
+import com.tallybot.backend.tallybot_back.domain.UserGroup;
 import com.tallybot.backend.tallybot_back.dto.ChatForGptDto;
 import com.tallybot.backend.tallybot_back.dto.SettlementDto;
+import com.tallybot.backend.tallybot_back.dto.SettlementResponseWrapper;
 import com.tallybot.backend.tallybot_back.exception.NoSettlementResultException;
+import com.tallybot.backend.tallybot_back.repository.GroupRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-// import java.util.Collections;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
-// import static org.assertj.core.api.Assertions.assertThatThrownBy;
-// import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
-// import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 
-@ActiveProfiles("mock-data")  // 이 프로파일 조합으로 별도 컨텍스트 생성
-public class GPTServiceTest {
+class GPTServiceTest {
+
     private RestTemplate restTemplate;
     private GroupRepository groupRepository;
     private GPTService gptService;
@@ -40,89 +36,133 @@ public class GPTServiceTest {
     }
 
     @Test
+    @DisplayName("returnResults(): 정상 응답 시 finalResult 반환")
     void returnResults_success() {
         // given
-        Member m1 = Member.builder()
-                .nickname("지훈")
-                .build();
+        Long groupId = 3L;
+        when(groupRepository.findById(groupId))
+                .thenReturn(Optional.of(UserGroup.create(groupId, "정산방")));
 
-
-        Chat chat1 = Chat.builder()
-                .member(m1)
-                .timestamp(LocalDateTime.of(2025, 5, 1, 12, 0))
-                .message("정산하자")
-                .build();
-
-
-        List<Chat> chats = List.of(chat1);
-        List<ChatForGptDto> chatDtos = chats.stream()
-                .map(chat -> new ChatForGptDto(
-                        chat.getChatId(),
-                        chat.getMember().getMemberId(),
-                        chat.getMember().getNickname(),
-                        chat.getMessage(),
-                        chat.getTimestamp()
-                ))
-                .toList();
-
+        List<ChatForGptDto> chatDtos = List.of(
+                new ChatForGptDto(
+                        1L,
+                        10L,
+                        "지훈",
+                        "정산하자",
+                        LocalDateTime.of(2025, 5, 1, 12, 0)
+                )
+        );
 
         SettlementDto dto = new SettlementDto();
-        dto.setPlace("장소");
-        dto.setPayer("지훈");
         dto.setItem("삼겹살");
         dto.setAmount(30000);
-        dto.setConstants(Map.of("지훈", 0));
-        dto.setRatios(Map.of("지훈", 100));
 
-        SettlementDto[] mockResponse = new SettlementDto[]{ dto };
+        SettlementResponseWrapper wrapper = new SettlementResponseWrapper();
+        wrapper.setFinalResult(List.of(dto));
 
-
-
-        when(restTemplate.postForEntity(anyString(), any(), eq(SettlementDto[].class)))
-                .thenReturn(new ResponseEntity<>(mockResponse, HttpStatus.OK));
+        when(restTemplate.postForEntity(
+                anyString(),
+                any(),
+                eq(SettlementResponseWrapper.class)
+        )).thenReturn(new ResponseEntity<>(wrapper, HttpStatus.OK));
 
         // when
-        List<SettlementDto> results = gptService.returnResults(3L, chatDtos);
+        List<SettlementDto> results = gptService.returnResults(groupId, chatDtos);
 
         // then
         assertEquals(1, results.size());
         assertEquals("삼겹살", results.get(0).getItem());
 
-        // request body 확인용 캡처
-        ArgumentCaptor<Object> requestCaptor = ArgumentCaptor.forClass(Object.class);
-        verify(restTemplate).postForEntity(anyString(), requestCaptor.capture(), eq(SettlementDto[].class));
-
-        Object requestBody = requestCaptor.getValue();
-        assertNotNull(requestBody);
-        // 요청 포맷이 PythonRequestDto로 생성되었는지 간단 검증 가능 (자세한 필드 확인은 통합 테스트로)
+        // 요청 바디가 requestDto로 넘어갔는지 캡처 (구체 필드 검증은 필요 시 추가)
+        ArgumentCaptor<Object> bodyCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(restTemplate).postForEntity(anyString(), bodyCaptor.capture(), eq(SettlementResponseWrapper.class));
+        assertNotNull(bodyCaptor.getValue());
     }
 
     @Test
-    void returnResults_shouldThrowException_whenResponseBodyIsNull() {
-        when(restTemplate.postForEntity(anyString(), any(), eq(SettlementDto[].class)))
-                .thenReturn(new ResponseEntity<>(new SettlementDto[0], HttpStatus.OK));
+    @DisplayName("returnResults(): wrapper(body)가 null이면 NoSettlementResultException")
+    void returnResults_shouldThrow_whenWrapperIsNull() {
+        // given
+        Long groupId = 3L;
+        when(groupRepository.findById(groupId))
+                .thenReturn(Optional.of(UserGroup.create(groupId, "정산방")));
 
+        when(restTemplate.postForEntity(anyString(), any(), eq(SettlementResponseWrapper.class)))
+                .thenReturn(new ResponseEntity<>(null, HttpStatus.OK));
+
+        // when & then
         assertThrows(NoSettlementResultException.class, () ->
-                gptService.returnResults(3L, List.of()));
+                gptService.returnResults(groupId, sampleChatDtos()));
     }
 
     @Test
+    @DisplayName("returnResults(): finalResult가 null이면 NoSettlementResultException")
+    void returnResults_shouldThrow_whenFinalResultIsNull() {
+        // given
+        Long groupId = 3L;
+        when(groupRepository.findById(groupId))
+                .thenReturn(Optional.of(UserGroup.create(groupId, "정산방")));
+
+        SettlementResponseWrapper wrapper = new SettlementResponseWrapper();
+        wrapper.setFinalResult(null);
+
+        when(restTemplate.postForEntity(anyString(), any(), eq(SettlementResponseWrapper.class)))
+                .thenReturn(new ResponseEntity<>(wrapper, HttpStatus.OK));
+
+        // when & then
+        assertThrows(NoSettlementResultException.class, () ->
+                gptService.returnResults(groupId, sampleChatDtos()));
+    }
+
+    @Test
+    @DisplayName("returnResults(): finalResult가 empty면 NoSettlementResultException")
+    void returnResults_shouldThrow_whenFinalResultIsEmpty() {
+        // given
+        Long groupId = 3L;
+        when(groupRepository.findById(groupId))
+                .thenReturn(Optional.of(UserGroup.create(groupId, "정산방")));
+
+        SettlementResponseWrapper wrapper = new SettlementResponseWrapper();
+        wrapper.setFinalResult(List.of()); // empty
+
+        when(restTemplate.postForEntity(anyString(), any(), eq(SettlementResponseWrapper.class)))
+                .thenReturn(new ResponseEntity<>(wrapper, HttpStatus.OK));
+
+        // when & then
+        assertThrows(NoSettlementResultException.class, () ->
+                gptService.returnResults(groupId, sampleChatDtos()));
+    }
+
+    @Test
+    @DisplayName("returnResults(): RestTemplate 호출 중 예외 발생 시 RuntimeException 래핑")
     void returnResults_server_error() {
-        when(restTemplate.postForEntity(anyString(), any(), eq(SettlementDto[].class)))
+        // given
+        Long groupId = 3L;
+        when(groupRepository.findById(groupId))
+                .thenReturn(Optional.of(UserGroup.create(groupId, "정산방")));
+
+        when(restTemplate.postForEntity(anyString(), any(), eq(SettlementResponseWrapper.class)))
                 .thenThrow(new RuntimeException("연결 실패"));
 
+        // when
         RuntimeException ex = assertThrows(RuntimeException.class, () ->
-                gptService.returnResults(3L, List.of()));
+                gptService.returnResults(groupId, sampleChatDtos()));
 
-        assertTrue(ex.getMessage().contains("GPT 서버 응답 처리 중 오류"));
+        // then
+        assertTrue(ex.getMessage().contains("GPT 서버 응답 처리 중 오류가 발생했습니다."));
+        assertNotNull(ex.getCause());
+        assertTrue(ex.getCause().getMessage().contains("연결 실패"));
     }
 
-//     private List<Chat> mockChatList() {
-//         Chat chat = new Chat();
-//         Member member = new Member();
-//         member.setNickname("Alice");
-//         chat.setMember(member);
-//         chat.setMessage("밥 먹자~");
-//         return Collections.singletonList(chat);
-//     }
+    private List<ChatForGptDto> sampleChatDtos() {
+        return List.of(
+                new ChatForGptDto(
+                        1L,
+                        10L,
+                        "지훈",
+                        "정산하자",
+                        LocalDateTime.of(2025, 5, 1, 12, 0)
+                )
+        );
+    }
 }

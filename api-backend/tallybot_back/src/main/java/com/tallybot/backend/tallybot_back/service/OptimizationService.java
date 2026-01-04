@@ -42,7 +42,7 @@ public class OptimizationService {
                 Member payer = s.getPayer(); // 돈 낸 사람 (받을 사람)
                 Member payee = pc.getParticipantKey().getMember(); // 참여자 (줄 사람)
 
-                // ✅ 돈을 줘야 하는 사람 → 받은 사람
+                // 돈을 줘야 하는 사람 → 받은 사람
                 Pair<Member, Member> p = Pair.of(payee, payer);
 
                 int constant = pc.getConstant();
@@ -54,10 +54,6 @@ public class OptimizationService {
 
                 int totalShare = constant + ratioShare;
 
-                // 로그
-                System.out.println("🩵 - Ratio (as double): " + ratio);
-                System.out.println(" - Ratio Share: " + ratioShare);
-                System.out.println(" - Total Share: " + totalShare);
 
                 m.put(p, m.getOrDefault(p, 0) + totalShare);
             }
@@ -78,48 +74,10 @@ public class OptimizationService {
 
 
 
-
-//
-//    private List<CalculateDetail> optimize(List<Settlement> sm, List<CalculateDetail> lcd) {
-//        Set<Member> members = new HashSet<>();
-//        Calculate calculate = sm.get(0).getCalculate();
-//        for (CalculateDetail cd : lcd) {
-//            members.add(cd.getPayer());
-//            members.add(cd.getPayee());
-//        }
-//
-//        List<Member> memberList = new ArrayList<>(members);
-//        Graph graph = new Graph(memberList.size());
-//
-//        for (CalculateDetail cd : lcd) {
-//            int payerNum = memberList.indexOf(cd.getPayer());
-//            int payeeNum = memberList.indexOf(cd.getPayee());
-//            graph.addEdge(payerNum, payeeNum, cd.getAmount());
-//        }
-//
-//        Graph graph2 = Graph.summarize(graph);
-//        if (graph2.getEdgeCount() < graph.getEdgeCount()) {
-//            graph = graph2;
-//        }
-//
-//        List<CalculateDetail> lcd2 = new ArrayList<>();
-//        for (int i = 0; i < graph.getVertexCount(); i++) {
-//            for (Integer j : graph.getAdjacencyList().get(i).keySet()) {
-//                if (graph.getAdjacencyList().get(i).get(j) < 0) continue;
-//                lcd2.add(new CalculateDetail(null, calculate, memberList.get(i), memberList.get(j),
-//                        graph.getAdjacencyList().get(i).get(j)));
-//            }
-//        }
-//
-//        return lcd2;
-//    }
-
     private List<CalculateDetail> optimize(List<Settlement> sm, List<CalculateDetail> lcd) {
         Set<Member> members = new HashSet<>();
         Calculate calculate = sm.get(0).getCalculate();
 
-        // ✅ 정산 요약 로그 추가
-        System.out.println("\n📌 개인별 정산 요약 (받을 돈 - 줄 돈)");
 
         Map<Member, Integer> totalPaid = new HashMap<>();
         Map<Member, Integer> totalReceived = new HashMap<>();
@@ -135,16 +93,8 @@ public class OptimizationService {
         allMembers.addAll(totalPaid.keySet());
         allMembers.addAll(totalReceived.keySet());
 
-        for (Member m : allMembers) {
-            int paid = totalPaid.getOrDefault(m, 0);
-            int received = totalReceived.getOrDefault(m, 0);
-            int net = received - paid;
 
-            System.out.println("❤️- Member " + m.getMemberId() + " → 정산 결과: " +
-                    (net > 0 ? "+받을 금액 " : (net < 0 ? "-줄 금액 " : "정산 완료 ")) + Math.abs(net));
-        }
-
-        // 👥 참여 멤버 인덱스 구성
+        // 참여 멤버 인덱스 구성
         List<Member> memberList = new ArrayList<>(members);
         Graph graph = new Graph(memberList.size());
 
@@ -154,13 +104,13 @@ public class OptimizationService {
             graph.addEdge(payerNum, payeeNum, cd.getAmount());
         }
 
-        // 🔄 summarize로 그래프 최적화
+        // summarize로 그래프 최적화
         Graph graph2 = Graph.summarize(graph);
         if (graph2.getEdgeCount() < graph.getEdgeCount()) {
             graph = graph2;
         }
 
-        // 📦 최적화된 결과로 CalculateDetail 재구성
+        // 최적화된 결과로 CalculateDetail 재구성
         List<CalculateDetail> lcd2 = new ArrayList<>();
         for (int i = 0; i < graph.getVertexCount(); i++) {
             for (Integer j : graph.getAdjacencyList().get(i).keySet()) {

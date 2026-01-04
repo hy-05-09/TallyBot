@@ -1,7 +1,6 @@
 package com.tallybot.backend.tallybot_back.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import com.tallybot.backend.tallybot_back.dto.ResponseDetailDto;
 import com.tallybot.backend.tallybot_back.domain.*;
 import com.tallybot.backend.tallybot_back.dto.*;
 import com.tallybot.backend.tallybot_back.service.*;
@@ -21,10 +20,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
-// import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -117,16 +115,15 @@ class CalculateControllerTest {
     @DisplayName("200 ok : 정산 결과 정상 반환")
     void getBotResult_success() throws Exception {
         // given
-        UserGroup userGroup = new UserGroup();
-        userGroup.setGroupId(42L);
+        UserGroup group = UserGroup.create(42L, "정산방");
 
         Calculate calculate = Calculate.builder()
                 .status(CalculateStatus.COMPLETED)
-                .userGroup(userGroup)
+                .userGroup(group)
                 .build();
 
-        Calculate saved = calculateRepository.save(calculate);
-        Long id = saved.getCalculateId();
+        Long id = 42L;
+        ReflectionTestUtils.setField(calculate, "calculateId", id); 
 
         List<TransferDto> transfers = List.of(
                 new TransferDto(1001L, 1002L, 12000),
@@ -157,8 +154,8 @@ class CalculateControllerTest {
     void getBotResult_calculating() throws Exception {
         // given
         Calculate calculate = new Calculate();
-        Calculate saved = calculateRepository.save(calculate);
-        Long id = saved.getCalculateId();
+        Long id = 42L;
+        ReflectionTestUtils.setField(calculate, "calculateId", id); 
         calculate.changeStatus(CalculateStatus.CALCULATING);
 
         // when
@@ -194,9 +191,12 @@ class CalculateControllerTest {
     @DisplayName("200 OK : 정산 내역 리스트 정상 반환")
     void getSettlementList_success() throws Exception {
         // given
+        UserGroup group = UserGroup.create(100L, "치킨모임");
+
         Calculate calculate = new Calculate();
-        Calculate saved = calculateRepository.save(calculate);
-        Long id = saved.getCalculateId();
+        Long id = 42L;
+        ReflectionTestUtils.setField(calculate, "calculateId", id); 
+
 
         Member payer = Member.builder()
             .build();
@@ -209,13 +209,15 @@ class CalculateControllerTest {
             .build();
 
         Settlement settlement = Settlement.create(
-                new UserGroup(),
+                group,
                 payer,
                 calculate,
                 "카페",
                 "커피",
                 10000
         );
+        ReflectionTestUtils.setField(settlement, "settlementId", 10L);
+
 
         Participant.ParticipantKey pk1 = new Participant.ParticipantKey();
         pk1.setSettlement(settlement);
@@ -225,6 +227,8 @@ class CalculateControllerTest {
         p1.setParticipantKey(pk1);
         p1.setConstant(0);
         p1.setRatio(new Ratio(1));
+        ReflectionTestUtils.setField(participant1, "memberId", 1001L);
+
 
         Participant.ParticipantKey pk2 = new Participant.ParticipantKey();
         pk2.setSettlement(settlement);
@@ -234,21 +238,28 @@ class CalculateControllerTest {
         p2.setParticipantKey(pk2);
         p2.setConstant(0);
         p2.setRatio(new Ratio(2));
+        ReflectionTestUtils.setField(participant2, "memberId", 1002L);
 
         settlement.addParticipant(p1);
         settlement.addParticipant(p2);
 
         when(calculateRepository.findById(id)).thenReturn(Optional.of(calculate));
-        when(settlementRepository.findByCalculate(calculate)).thenReturn(List.of(settlement));
+        when(settlementRepository.findByCalculate(any(Calculate.class)))
+                .thenReturn(List.of(settlement));
+        when(settlementRepository.findByCalculateWithParticipants(any(Calculate.class)))
+                .thenReturn(List.of(settlement));
+        when(settlementRepository.findWithParticipantsByCalculateId(eq(id)))
+                .thenReturn(List.of(settlement));
+
 
         // when & then
         mockMvc.perform(get("/api/calculate/"+id+"/settlements"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.settlementCount").value(1))
-                .andExpect(jsonPath("$.settlements[0].settlementId").value(settlement.getSettlementId()))
+                .andExpect(jsonPath("$.settlements[0].settlementId").value(10L))
                 .andExpect(jsonPath("$.settlements[0].place").value("카페"))
-                .andExpect(jsonPath("$.settlements[0].ratios[p1.getMemberId()]").value(1))
-                .andExpect(jsonPath("$.settlements[0].ratios[p2.getMemberId()]").value(2))
+                .andExpect(jsonPath("$.settlements[0].ratios['1001']").value(1))
+                .andExpect(jsonPath("$.settlements[0].ratios['1002']").value(2))
                 .andExpect(jsonPath("$.settlements[0].ratioSum").value(3));
     }
 
@@ -280,9 +291,8 @@ class CalculateControllerTest {
     void getTransferList_success() throws Exception {
         // given
         Calculate calculate = new Calculate();
-        Calculate saved = calculateRepository.save(calculate);
-        Long id = saved.getCalculateId();
-
+        Long id = 42L;
+        ReflectionTestUtils.setField(calculate, "calculateId", id); 
         Member payer1 = Member.builder().build();
         ReflectionTestUtils.setField(payer1, "memberId", 1001L);
 
@@ -356,8 +366,8 @@ class CalculateControllerTest {
     @DisplayName("200 ok : 정산 완료 처리 성공")
     void completeCalculate_success() throws Exception {
         Calculate calculate = new Calculate();
-        Calculate saved = calculateRepository.save(calculate);
-        Long id = saved.getCalculateId();
+        Long id = 42L;
+        ReflectionTestUtils.setField(calculate, "calculateId", id); 
 
         when(calculateRepository.findById(id)).thenReturn(Optional.of(calculate));
         when(calculateRepository.save(any(Calculate.class))).thenReturn(calculate);
@@ -376,7 +386,7 @@ class CalculateControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.error").value("Calculate ID must be positive."));
+                .andExpect(jsonPath("$.error").value("Calculate ID must not be null."));
     }
 
     @Test
@@ -396,8 +406,8 @@ class CalculateControllerTest {
     void recalculate_success() throws Exception {
         // Given: 가짜 Calculate 객체와 상태 설정
         Calculate calculate = new Calculate();
-        Calculate saved = calculateRepository.save(calculate);
-        Long id = saved.getCalculateId();
+        Long id = 42L;
+        ReflectionTestUtils.setField(calculate, "calculateId", id); 
         calculate.changeStatus(CalculateStatus.PENDING);
 
         when(calculateRepository.findById(id)).thenReturn(Optional.of(calculate));
@@ -422,19 +432,5 @@ class CalculateControllerTest {
                 .andExpect(jsonPath("$.error").value("Calculate ID must not be null."));
     }
 
-//    @Test
-//    @DisplayName("404 Not Found : 재정산 실패 - calculateId에 해당하는 엔티티 없음")
-//    void recalculate_fail_notFound() throws Exception {
-//        Long invalidId = 999L;
-//
-//        // calculateRepository.findById()가 빈 값을 반환하게 설정
-//        when(calculateRepository.findById(invalidId)).thenReturn(Optional.empty());
-//
-//        mockMvc.perform(post("/api/calculate/recalculate")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content(objectMapper.writeValueAsString(Map.of("calculateId", invalidId))))
-//                .andExpect(status().isNotFound())
-//                .andExpect(jsonPath("$.error").value("Calculate entity not found."));
-//    }
 
 }

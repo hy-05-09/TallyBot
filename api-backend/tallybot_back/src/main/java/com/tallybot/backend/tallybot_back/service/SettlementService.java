@@ -7,7 +7,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.*;
-// import java.util.stream.Collectors;
 
 
 @Service
@@ -18,7 +17,6 @@ public class SettlementService {
     private final SettlementRepository settlementRepository;
     private final MemberRepository memberRepository;
     private final CalculateRepository calculateRepository;
-    // private final GroupRepository groupRepository;
     private final OptimizationService optimizationService;
     private final CalculateDetailRepository calculateDetailRepository;
 
@@ -118,7 +116,6 @@ public class SettlementService {
             List<Member> participants;
             Map<String, Integer> constants = request.getConstants();
             Map<String, Integer> ratios = request.getRatios();
-            // Integer sum = request.getSum();
 
 
 
@@ -145,7 +142,6 @@ public class SettlementService {
                         .toList();
 
                 participants = memberRepository.findAllById(participantIds);
-//                int ratioSum = (sum != null) ? sum : participants.size();  // 참여자 수 기반
                 int ratioSum = (ratios != null)
                         ? ratios.values().stream().mapToInt(Integer::intValue).sum()
                         : participants.size();
@@ -228,11 +224,6 @@ public class SettlementService {
                     /// participants 수정
                     case "participants" -> {
                         if (value instanceof List<?> rawList) {
-                            // 기존 Participant 명시적으로 제거
-//                            for (Participant old : new HashSet<>(settlement.getParticipants())) {
-//                                old.getParticipantKey().setSettlement(null);  // 혹시 모르니 관계 끊기
-//                                settlement.getParticipants().remove(old);     // 리스트에서 제거
-//                            }
                             settlement.getParticipants().clear();
 
                             settlementRepository.flush();
@@ -277,28 +268,6 @@ public class SettlementService {
         }
     }
 
-//    /*
-//     * 각 정산에 대하여 참여하는 사람의 Nickname을 가져온다.
-//     */
-//    public List<String> nicknamesInCalculate(List<Settlement> settlementList) {
-//        Stream<Settlement> settlements = settlementList.stream();
-//
-//        // 각 정산의 참여자들을 Set을 이용해 겹치지 않게 합한다.
-//        Stream<String> members = settlements.flatMap(settlement -> {
-//            Long payer = settlement.getPayer().getMemberId();
-//            Set<Long> payeeIds = settlement.getParticipants().stream().map(participant
-//                    -> participant.getParticipantKey().member.getMemberId()).collect(Collectors.toSet());
-//            payeeIds.add(payer);
-//            return payeeIds.stream();
-//        }).map(id -> {
-//            return memberRepository.findById(id).orElseThrow(
-//                    () -> new IllegalArgumentException("해당자 없음"));
-//        }).map(Member::getNickname);
-//
-//        // List 형태로 변환하여 반환한다.
-//        return members.collect(Collectors.toList());
-//    }
-//
 
     public void applyAfterUpdate(Long calculateId) {
         Calculate calculate = calculateRepository.findById(calculateId)
@@ -325,7 +294,7 @@ public class SettlementService {
         UserGroup userGroup = calculate.getUserGroup();
 
         // Payer 조회
-        String payerInfo = settlementDto.getPayer(); // ✅ 올바른 접근
+        String payerInfo = settlementDto.getPayer(); 
 
         // 필요하면 Long으로 변환
         Long payerId = Long.parseLong(payerInfo);
@@ -384,14 +353,6 @@ public class SettlementService {
         return settlementList;
     }
 
-
-//    public List<Settlement> toSettlements(List<SettlementDto> settlementDtos, Group group, Long calculateId) {
-//        List<Settlement> settlementList = new ArrayList<>();
-//        for (SettlementDto dto : settlementDtos) {
-//            settlementList.add(toSettlement(dto, null, group, calculateId));
-//        }
-//        return settlementList;
-//    }
 
 
 }

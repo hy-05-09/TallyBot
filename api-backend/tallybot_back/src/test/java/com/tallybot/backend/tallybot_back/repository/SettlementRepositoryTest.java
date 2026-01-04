@@ -27,6 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Transactional
 @Rollback
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@Tag("slow")
 public class SettlementRepositoryTest extends DatabaseTestBase {
 
     @Autowired

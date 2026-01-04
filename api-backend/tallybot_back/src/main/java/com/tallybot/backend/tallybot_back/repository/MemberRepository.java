@@ -11,8 +11,6 @@ import java.util.Optional;
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
-    Optional<Member> findByMemberId(Long memberId);
-
     Optional<Member> findByMemberIdAndUserGroup(Long memberId, UserGroup userGroup);
 
     int countByUserGroup(UserGroup userGroup);

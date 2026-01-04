@@ -14,8 +14,8 @@ import java.util.List;
 public interface SettlementRepository extends JpaRepository<Settlement, Long> {
     List<Settlement> findByCalculate(Calculate calculate);
     List<Settlement> findByUserGroup(UserGroup userGroup);
-    void deleteByCalculate(Calculate calculate);
-    @Query("SELECT s FROM Settlement s " +
+    void deleteAllByCalculate(Calculate calculate);
+    @Query("SELECT DISTINCT s FROM Settlement s " +
             "JOIN FETCH s.participants p " +
             "JOIN FETCH p.participantKey.member " +
             "WHERE s.calculate.calculateId = :calculateId")

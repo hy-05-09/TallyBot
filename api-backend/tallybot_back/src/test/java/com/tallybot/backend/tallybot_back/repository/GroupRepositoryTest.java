@@ -24,6 +24,7 @@ import java.util.Optional;
 @Transactional
 @Rollback
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+@Tag("slow")
 class GroupRepositoryTest extends DatabaseTestBase {
 
     @Autowired
@@ -57,11 +58,11 @@ class GroupRepositoryTest extends DatabaseTestBase {
     @DisplayName("새로운 group 추가")
     void saveAndFindUserGroup() {
         // given
-        UserGroup userGroup1 = new UserGroup(1753L,"새로운 톡방");
+        UserGroup userGroup1 = UserGroup.create(1753L,"새로운 톡방");
         groupRepository.save(userGroup1);
-        UserGroup userGroup2 = new UserGroup(2782L, "2019 17기 Withme");
+        UserGroup userGroup2 = UserGroup.create(2782L, "2019 17기 Withme");
         groupRepository.save(userGroup2);
-        UserGroup userGroup3 = new UserGroup(33038L, "삼겹살집 번개모임");
+        UserGroup userGroup3 = UserGroup.create(33038L,"삼겹살 번개모임");
         groupRepository.save(userGroup3);
 
         // when
