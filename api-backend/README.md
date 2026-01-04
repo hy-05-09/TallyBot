@@ -222,7 +222,10 @@ DataInitializer 자동 데이터 생성:
 # 🚀 How to Run
 ## Backend (Spring Boot)
 <kbd>./gradlew build</kbd> <br>
-<kbd>./gradlew bootRun</kbd>
+
+✅ Local (Dev, AWS 미사용)
+로컬에서는 AWS Secrets Manager를 사용하지 않는 dev 프로필로 실행합니다.
+<kbd>./gradlew bootRun --args="--spring.profiles.active=dev"</kbd>
 
 <br>
 
