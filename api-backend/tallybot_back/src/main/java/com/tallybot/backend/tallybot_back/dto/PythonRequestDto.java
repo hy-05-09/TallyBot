@@ -11,7 +11,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PythonRequestDto {
-    private Long chatroom_id;
+    private Long chatroomId;
 
     @JsonProperty("chatroom_name")
     private String chatroomName;

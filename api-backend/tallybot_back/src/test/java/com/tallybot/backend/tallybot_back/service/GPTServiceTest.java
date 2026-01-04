@@ -42,9 +42,9 @@ public class GPTServiceTest {
     @Test
     void returnResults_success() {
         // given
-        Member m1 = new Member();
-        m1.setMemberId(1L);
-        m1.setNickname("지훈");
+        Member m1 = Member.builder()
+                .nickname("지훈")
+                .build();
 
 
         Chat chat1 = Chat.builder()

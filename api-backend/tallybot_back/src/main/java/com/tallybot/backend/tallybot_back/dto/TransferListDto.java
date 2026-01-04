@@ -1,11 +1,11 @@
 package com.tallybot.backend.tallybot_back.dto;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
 
 import java.util.List;
 
-@Data
+@Getter
 @AllArgsConstructor
 public class TransferListDto {
     private int transferCount;

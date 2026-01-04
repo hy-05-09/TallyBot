@@ -1,5 +1,7 @@
 package com.tallybot.backend.tallybot_back.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.*;
 
 @Getter
@@ -7,8 +9,9 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PythonMessageDto {
-    private String unique_chat_id;
-    private String speaker;  // Member ID as String
-    private String message_content;
+    private String uniqueChatId;
+    @JsonProperty("speaker")
+    private String speakerId;  // Member ID as String
+    private String messageContent;
     private String timestamp;
 }

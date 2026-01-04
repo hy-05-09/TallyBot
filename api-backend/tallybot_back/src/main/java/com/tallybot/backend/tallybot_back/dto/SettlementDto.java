@@ -10,7 +10,6 @@ import java.util.Map;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
 public class SettlementDto {
     private String place;
 

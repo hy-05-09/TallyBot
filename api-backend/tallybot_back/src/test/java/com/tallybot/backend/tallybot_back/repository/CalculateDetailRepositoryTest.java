@@ -75,22 +75,15 @@ class CalculateDetailRepositoryTest extends DatabaseTestBase {
             userGroupMembers.add(new ArrayList<>());
         }
 
-        UserGroup group = UserGroup.builder()
-                .groupId(8810L)
-                .groupName("새로운 톡방")
-                .build();
+        UserGroup group = UserGroup.create(8810L, "새로운 톡방");
 
         userGroups.set(0, groupRepository.save(group));
 
-        group = UserGroup.builder()
-                .groupId(4042L)
-                .groupName("2019 17기 Withme")
-                .build();
+        group = UserGroup.create(4042L, "2019 17기 Withme");
 
         userGroups.set(1, groupRepository.save(group));
 
         Member member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(0))
                 .nickname("철수")
                 .build();
@@ -98,7 +91,6 @@ class CalculateDetailRepositoryTest extends DatabaseTestBase {
         userGroupMembers.get(0).add(memberRepository.save(member));
 
         member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(0))
                 .nickname("영희")
                 .build();
@@ -106,7 +98,6 @@ class CalculateDetailRepositoryTest extends DatabaseTestBase {
         userGroupMembers.get(0).add(memberRepository.save(member));
 
         member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(1))
                 .nickname("철수")
                 .build();
@@ -114,7 +105,6 @@ class CalculateDetailRepositoryTest extends DatabaseTestBase {
         userGroupMembers.get(1).add(memberRepository.save(member));
 
         member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(1))
                 .nickname("민경")
                 .build();
@@ -122,7 +112,6 @@ class CalculateDetailRepositoryTest extends DatabaseTestBase {
         userGroupMembers.get(1).add(memberRepository.save(member));
 
         member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(1))
                 .nickname("정현")
                 .build();
@@ -149,7 +138,6 @@ class CalculateDetailRepositoryTest extends DatabaseTestBase {
         calculateRepository.save(cal1);
 
         CalculateDetail cd0 = CalculateDetail.builder()
-                .calculateDetailId(null)
                 .amount(64050)
                 .calculate(cal0)
                 .payer(userGroupMembers.get(0).get(0))
@@ -159,7 +147,6 @@ class CalculateDetailRepositoryTest extends DatabaseTestBase {
         calculateDetailRepository.save(cd0);
 
         CalculateDetail cd1 = CalculateDetail.builder()
-                .calculateDetailId(null)
                 .amount(34050)
                 .calculate(cal1)
                 .payer(userGroupMembers.get(1).get(1))
@@ -167,7 +154,6 @@ class CalculateDetailRepositoryTest extends DatabaseTestBase {
                 .build();
 
         CalculateDetail cd2 = CalculateDetail.builder()
-                .calculateDetailId(null)
                 .amount(4940)
                 .calculate(cal1)
                 .payer(userGroupMembers.get(1).get(1))
@@ -181,7 +167,7 @@ class CalculateDetailRepositoryTest extends DatabaseTestBase {
         List<CalculateDetail> cds02 = calculateDetailRepository.findAllByCalculate_CalculateId(cal0.getCalculateId() + 8081);
 
         calculateDetailRepository.deleteByCalculate(cal1);
-        calculateDetailRepository.deleteByCalculate(calculateDetailRepository.findAllByCalculate_CalculateId(cal0.getCalculateId() + 8081));
+        calculateDetailRepository.deleteByCalculate_CalculateId(cal0.getCalculateId() + 8081);
 
         List<CalculateDetail> cds10 = calculateDetailRepository.findAllByCalculate(cal0);
         List<CalculateDetail> cds11 = calculateDetailRepository.findAllByCalculate(cal1);

@@ -31,10 +31,10 @@ public class GroupService {
                 .orElseGet(() -> groupRepository.save(UserGroup.create(request.getGroupId(), request.getGroupName())));
 
         // 중복 멤버 확인
-        boolean exists = memberRepository.existsByUserGroupAndNickname(userGroup, request.getMember());
+        boolean exists = memberRepository.existsByUserGroupAndNickname(userGroup, request.getMemberNickname());
         if (!exists) {
             Member member = Member.builder()
-            .nickname(request.getMember())
+            .nickname(request.getMemberNickname())
             .userGroup(userGroup)
             .build();
             memberRepository.save(member);

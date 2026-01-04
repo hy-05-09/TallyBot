@@ -1002,3 +1002,177 @@ Caused by: org.hibernate.query.SemanticException: Cannot compare left expression
 2026-01-04T17:45:27.844+09:00  WARN 3556 --- [http-nio-8080-exec-3] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource api/health.]
 2026-01-04T17:45:27.878+09:00  WARN 3556 --- [http-nio-8080-exec-4] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
 2026-01-04T17:45:40.958+09:00  WARN 3556 --- [http-nio-8080-exec-6] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
+2026-01-04T18:05:33.192+09:00  INFO 41148 --- [restartedMain] c.t.b.t.TallybotBackApplication          : Starting TallybotBackApplication using Java 17.0.17 with PID 41148 (C:\Users\jhy69\OneDrive\문서\GitHub\TallyBot\api-backend\tallybot_back\build\classes\java\main started by jhy69 in C:\Users\jhy69\OneDrive\문서\GitHub\TallyBot\api-backend\tallybot_back)
+2026-01-04T18:05:33.194+09:00 DEBUG 41148 --- [restartedMain] c.t.b.t.TallybotBackApplication          : Running with Spring Boot v3.4.5, Spring v6.2.6
+2026-01-04T18:05:33.194+09:00  INFO 41148 --- [restartedMain] c.t.b.t.TallybotBackApplication          : The following 1 profile is active: "dev"
+2026-01-04T18:05:33.228+09:00  INFO 41148 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2026-01-04T18:05:33.228+09:00  INFO 41148 --- [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2026-01-04T18:05:33.910+09:00  INFO 41148 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-04T18:05:33.968+09:00  INFO 41148 --- [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 51 ms. Found 7 JPA repository interfaces.
+2026-01-04T18:05:34.511+09:00  INFO 41148 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-01-04T18:05:34.522+09:00  INFO 41148 --- [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-01-04T18:05:34.522+09:00  INFO 41148 --- [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.40]
+2026-01-04T18:05:34.566+09:00  INFO 41148 --- [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-01-04T18:05:34.567+09:00  INFO 41148 --- [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1339 ms
+2026-01-04T18:05:34.775+09:00  INFO 41148 --- [restartedMain] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-01-04T18:05:34.808+09:00  INFO 41148 --- [restartedMain] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.13.Final
+2026-01-04T18:05:34.832+09:00  INFO 41148 --- [restartedMain] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-01-04T18:05:35.041+09:00  INFO 41148 --- [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-04T18:05:35.063+09:00  INFO 41148 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-01-04T18:05:35.191+09:00  INFO 41148 --- [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection conn0: url=jdbc:h2:mem:testdb user=SA
+2026-01-04T18:05:35.194+09:00  INFO 41148 --- [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-01-04T18:05:35.214+09:00  WARN 41148 --- [restartedMain] org.hibernate.orm.deprecation            : HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2026-01-04T18:05:35.229+09:00  INFO 41148 --- [restartedMain] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 2.3.232
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-04T18:05:36.173+09:00  INFO 41148 --- [restartedMain] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-01-04T18:05:36.191+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    drop table if exists calculate cascade 
+2026-01-04T18:05:36.194+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    drop table if exists calculate_detail cascade 
+2026-01-04T18:05:36.194+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    drop table if exists chat cascade 
+2026-01-04T18:05:36.196+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    drop table if exists member cascade 
+2026-01-04T18:05:36.197+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    drop table if exists participant cascade 
+2026-01-04T18:05:36.198+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    drop table if exists settlement cascade 
+2026-01-04T18:05:36.199+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    drop table if exists user_group cascade 
+2026-01-04T18:05:36.202+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    create table calculate (
+        calculate_id bigint generated by default as identity,
+        end_time timestamp(6) not null,
+        group_id bigint not null,
+        start_time timestamp(6) not null,
+        status enum ('CALCULATING','COMPLETED','PENDING') not null,
+        primary key (calculate_id)
+    )
+2026-01-04T18:05:36.215+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    create table calculate_detail (
+        amount integer not null,
+        calculate_detail_id bigint generated by default as identity,
+        calculate_id bigint not null,
+        payee_id bigint not null,
+        payer_id bigint not null,
+        primary key (calculate_detail_id)
+    )
+2026-01-04T18:05:36.217+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    create table chat (
+        chat_id bigint generated by default as identity,
+        group_id bigint not null,
+        member_id bigint not null,
+        timestamp timestamp(6) not null,
+        message MEDIUMTEXT not null,
+        primary key (chat_id)
+    )
+2026-01-04T18:05:36.219+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    create table member (
+        group_id bigint not null,
+        member_id bigint generated by default as identity,
+        nickname VARCHAR(20) not null,
+        primary key (member_id)
+    )
+2026-01-04T18:05:36.220+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    create table participant (
+        constant integer not null,
+        denominator INT not null,
+        numerator INT not null,
+        member_id bigint not null,
+        settlement_id bigint not null,
+        primary key (member_id, settlement_id)
+    )
+2026-01-04T18:05:36.224+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    create table settlement (
+        amount integer not null,
+        calculate_id bigint not null,
+        group_id bigint not null,
+        payer_id bigint not null,
+        settlement_id bigint generated by default as identity,
+        item varchar(63) not null,
+        place varchar(63) not null,
+        primary key (settlement_id)
+    )
+2026-01-04T18:05:36.225+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    create table user_group (
+        group_id bigint not null,
+        group_name VARCHAR(50) not null,
+        primary key (group_id)
+    )
+2026-01-04T18:05:36.227+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists calculate 
+       add constraint FKfs4jrn8l3wlod5jvvshpim6ws 
+       foreign key (group_id) 
+       references user_group
+2026-01-04T18:05:36.240+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists calculate_detail 
+       add constraint FK885cdgusidxshkubf5w45u1w8 
+       foreign key (calculate_id) 
+       references calculate
+2026-01-04T18:05:36.241+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists calculate_detail 
+       add constraint FK8wd2gu3lo6yh2hu6kc1pfithe 
+       foreign key (payee_id) 
+       references member
+2026-01-04T18:05:36.243+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists calculate_detail 
+       add constraint FK4dg4ixn11w2ghd35u4674ee64 
+       foreign key (payer_id) 
+       references member
+2026-01-04T18:05:36.244+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists chat 
+       add constraint FKgvc5hrt0h18xk63qosss3ti30 
+       foreign key (member_id) 
+       references member
+2026-01-04T18:05:36.246+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists chat 
+       add constraint FKgjakr3e1ux37qs8u392j9dkmo 
+       foreign key (group_id) 
+       references user_group
+2026-01-04T18:05:36.249+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists member 
+       add constraint FKomytwiw2f3cy5b7p829b5c006 
+       foreign key (group_id) 
+       references user_group
+2026-01-04T18:05:36.250+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists participant 
+       add constraint FK6wairr1n12kj12eguo7hokhm1 
+       foreign key (settlement_id) 
+       references settlement
+2026-01-04T18:05:36.253+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists participant 
+       add constraint FKltl2dk33cemkl32l5fo3jmh85 
+       foreign key (member_id) 
+       references member
+2026-01-04T18:05:36.256+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists settlement 
+       add constraint FKkmxgxvfx1l6d5e775maehvcla 
+       foreign key (calculate_id) 
+       references calculate
+2026-01-04T18:05:36.257+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists settlement 
+       add constraint FKd4ewh0mi4sq5g90u0sioo95p8 
+       foreign key (payer_id) 
+       references member
+2026-01-04T18:05:36.260+09:00 DEBUG 41148 --- [restartedMain] org.hibernate.SQL                        : 
+    alter table if exists settlement 
+       add constraint FK919jli1nfm8bqoi64w6f1cmgk 
+       foreign key (group_id) 
+       references user_group
+2026-01-04T18:05:36.266+09:00  INFO 41148 --- [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-04T18:05:36.811+09:00  INFO 41148 --- [restartedMain] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-01-04T18:05:37.626+09:00  INFO 41148 --- [restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:h2:mem:testdb'
+2026-01-04T18:05:37.677+09:00  INFO 41148 --- [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2026-01-04T18:05:37.683+09:00  INFO 41148 --- [restartedMain] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 3 endpoints beneath base path '/actuator'
+2026-01-04T18:05:37.736+09:00  INFO 41148 --- [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-01-04T18:05:37.748+09:00  INFO 41148 --- [restartedMain] c.t.b.t.TallybotBackApplication          : Started TallybotBackApplication in 4.862 seconds (process running for 5.213)
+2026-01-04T18:05:38.586+09:00  INFO 41148 --- [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-01-04T18:05:38.586+09:00  INFO 41148 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-01-04T18:05:38.586+09:00  INFO 41148 --- [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 0 ms
+2026-01-04T18:05:38.688+09:00  WARN 41148 --- [http-nio-8080-exec-2] .m.m.a.ExceptionHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
