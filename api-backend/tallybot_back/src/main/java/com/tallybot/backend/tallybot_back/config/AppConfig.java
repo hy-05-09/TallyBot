@@ -7,6 +7,8 @@ import org.springframework.web.client.RestTemplate;
 
 @Configuration
 public class AppConfig {
+    
+    // External API(GPT server) 호출을 위한 RestTemplate Bean
     @Bean
     public RestTemplate restTemplate(RestTemplateBuilder builder) {
         return builder.build();

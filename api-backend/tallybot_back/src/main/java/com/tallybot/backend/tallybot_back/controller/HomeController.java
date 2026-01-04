@@ -5,11 +5,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/app")
+@RequestMapping("/health")
 public class HomeController {
 
     @GetMapping
     public String checkHealth() {
-        return "memberId";
+        return "TallyBot backend is running";
     }
 }

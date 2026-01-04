@@ -47,7 +47,7 @@ public class CalculateController {
 
     @GetMapping("/{calculateId}/brief-result")
     public ResponseEntity<?> getBotResult(@PathVariable Long calculateId) {
-        if (calculateId == null || calculateId <= 0) {
+        if (calculateId <= 0) {
             return ResponseEntity.badRequest()
                     .body(new ErrorResponse("Calculate ID must be a positive number."));
         }
@@ -70,9 +70,10 @@ public class CalculateController {
         return ResponseEntity.ok(response);
     }
 
+    // 참가자 Ratio를 프론트용 정수 비율로 변환하기 위해 분모의 LCM을 사용
     @GetMapping("/{calculateId}/settlements")
     public ResponseEntity<?> getSettlementList(@PathVariable Long calculateId) {
-        if (calculateId == null || calculateId <= 0) {
+        if (calculateId <= 0) {
             return ResponseEntity.badRequest()
                     .body(new ErrorResponse("Calculate ID must be positive."));
         }
@@ -83,8 +84,6 @@ public class CalculateController {
                     .body(new ErrorResponse("Calculate not found."));
         }
 
-        // Calculate calculate = optionalCalculate.get();
-//        List<Settlement> settlements = settlementRepository.findByCalculate(calculate);
         List<Settlement> settlements = settlementRepository.findWithParticipantsByCalculateId(calculateId);
 
 
@@ -128,18 +127,6 @@ public class CalculateController {
             int ratioSum = ratios.values().stream().mapToInt(Integer::intValue).sum();
 
 
-
-//// ratios map: 분자만 가져오면 됨 (정수화된 상태이므로)
-//            Map<String, Integer> ratios = participants.stream()
-//                    .collect(Collectors.toMap(
-//                            p -> String.valueOf(p.getParticipantKey().getMember().getMemberId()),
-//                            p -> p.getRatio().getNumerator()
-//                    ));
-//
-//            int ratioSum = ratios.values().stream().mapToInt(Integer::intValue).sum();
-
-
-
             return new FrontSettlementDto(
                     settlement.getSettlementId(),
                     settlement.getPlace(),
@@ -158,7 +145,7 @@ public class CalculateController {
 
     @GetMapping("/{calculateId}/transfers")
     public ResponseEntity<?> getTransferList(@PathVariable Long calculateId) {
-        if (calculateId == null || calculateId <= 0) {
+        if (calculateId <= 0) {
             return ResponseEntity.badRequest()
                     .body(new ErrorResponse("Calculate ID must be positive."));
         }
@@ -184,11 +171,11 @@ public class CalculateController {
     }
 
     @PostMapping("/complete")
-    public ResponseEntity<?> completeCalculate(@RequestBody Map<String, Long> body) {
-        Long calculateId = body.get("calculateId");
+    public ResponseEntity<?> completeCalculate(@Valid @RequestBody CompleteCalculateRequestDto request) {
+        Long calculateId = request.getCalculateId();
 
         // 유효성 검사
-        if (calculateId == null || calculateId <= 0) {
+        if (calculateId <= 0) {
             return ResponseEntity.badRequest()
                     .body(new ErrorResponse("Calculate ID must be positive."));
         }
@@ -203,28 +190,32 @@ public class CalculateController {
         calculate.setStatus(CalculateStatus.COMPLETED);
         calculateRepository.save(calculate);
 
-        return ResponseEntity.ok(Map.of("message", "Calculation marked as completed."));
+        return ResponseEntity.ok(new MessageResponse("Calculation marked as completed."));
     }
 
     @PostMapping("/recalculate")
-    public ResponseEntity<?> recalculate(@RequestBody RecalculateRequestDto request) {
+    public ResponseEntity<?> recalculate(@Valid @RequestBody RecalculateRequestDto request) {
         if (request.getCalculateId() == null) {
             return ResponseEntity.badRequest()
-                    .body(Map.of("error", "Calculate ID must not be null."));
+                    .body(new ErrorResponse("Calculate ID must not be null."));
         }
 
-        Calculate calculate = calculateRepository.findById(request.getCalculateId())
-                .orElseThrow(() -> new NoSuchElementException("Calculate entity not found."));
+        if (request.getCalculateId() <= 0) {
+                return ResponseEntity.badRequest()
+                        .body(new ErrorResponse("Calculate ID must be positive."));
+        }
+
+        Calculate calculate = calculateRepository.findById(request.getCalculateId()).orElse(null);
+        if (calculate == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ErrorResponse("Calculate entity not found."));
+        }
+
         calculate.setStatus(CalculateStatus.CALCULATING);
         calculateRepository.save(calculate);
 
-        try {
-            calculateService.recalculate(request.getCalculateId());
-            return ResponseEntity.ok(Map.of("message", "Recalculation completed successfully."));
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Calculate entity not found."));
-        }
+        calculateService.recalculate(request.getCalculateId());
+        return ResponseEntity.ok(new MessageResponse("Recalculation completed successfully."));
     }
 
 

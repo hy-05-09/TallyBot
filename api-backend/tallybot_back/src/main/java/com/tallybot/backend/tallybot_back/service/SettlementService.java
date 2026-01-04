@@ -22,6 +22,11 @@ public class SettlementService {
     private final OptimizationService optimizationService;
     private final CalculateDetailRepository calculateDetailRepository;
 
+    public void validateCalculateExists(Long calculateId) {
+        if (!calculateRepository.existsById(calculateId)) {
+            throw new NoSuchElementException("Calculate entity not found.");
+        }
+    }
 
     public boolean fieldExists(String fieldName, SettlementUpdateRequest request)
     {

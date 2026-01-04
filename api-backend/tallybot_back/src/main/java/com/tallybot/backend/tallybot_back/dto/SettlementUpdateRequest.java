@@ -7,12 +7,15 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import java.util.Map;
 
+import jakarta.validation.constraints.NotNull;
+
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class SettlementUpdateRequest {
+    @NotNull(message = "Calculate ID must not be null.")
     private Long calculateId;
     private Long settlementId;
     private String field;

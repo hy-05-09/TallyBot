@@ -5,15 +5,22 @@ import com.tallybot.backend.tallybot_back.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+@Profile("mock-data")
 @Component
 @RequiredArgsConstructor
 public class DataInitializer implements CommandLineRunner {
+    private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
     private final GroupRepository groupRepository;
     private final MemberRepository memberRepository;
@@ -27,7 +34,7 @@ public class DataInitializer implements CommandLineRunner {
     public void run(String... args) {
         if (groupRepository.count() > 0) return;
 
-        // 1. 그룹 생성 (groupId 수동 지정)
+        // 1. 테스트 시나리오를 위한 id 설정
         UserGroup group = new UserGroup();
         group.setGroupId(1L);
         group.setGroupName("치킨모임");
@@ -46,7 +53,7 @@ public class DataInitializer implements CommandLineRunner {
         createCalculateWithSettlements(group, members, CalculateStatus.PENDING, "PENDING");
         createCalculateWithSettlements(group, members, CalculateStatus.CALCULATING, "CALCULATING");
 
-        System.out.println("✅ Mock 데이터가 성공적으로 생성되었습니다.");
+        log.info("✅ Mock 데이터가 성공적으로 생성되었습니다.");
     }
 
     private void createCalculateWithSettlements(UserGroup group, List<Member> members, CalculateStatus status, String label) {
