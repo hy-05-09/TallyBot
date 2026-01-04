@@ -54,11 +54,12 @@ public class ChatService {
             Member member = memberRepository.findByMemberIdAndUserGroup(dto.getMemberId(), userGroup)
                     .orElseThrow(() -> new IllegalArgumentException("Member not found"));
 
-            Chat chat = new Chat();
-            chat.setUserGroup(userGroup);
-            chat.setMember(member);
-            chat.setTimestamp(dto.getTimestamp());
-            chat.setMessage(dto.getMessage());
+            Chat chat = Chat.builder()
+                .userGroup(userGroup)
+                .member(member)
+                .timestamp(dto.getTimestamp())
+                .message(dto.getMessage())
+                .build();
 
             chatList.add(chat);
         }

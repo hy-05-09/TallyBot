@@ -5,8 +5,6 @@ import lombok.*;
 
 @Entity
 @Getter
-@Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "calculate_detail")
@@ -31,4 +29,15 @@ public class CalculateDetail {
 
     @Column(name = "amount", nullable = false)
     private int amount;
+
+    @Builder
+    private CalculateDetail(Calculate calculate, Member payer, Member payee, int amount) {
+        if (amount <= 0) {
+            throw new IllegalArgumentException("amount must be positive");
+        }
+        this.calculate = calculate;
+        this.payer = payer;
+        this.payee = payee;
+        this.amount = amount;
+    }
 }

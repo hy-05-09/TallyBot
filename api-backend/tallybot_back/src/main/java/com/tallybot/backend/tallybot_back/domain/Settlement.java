@@ -3,14 +3,12 @@ package com.tallybot.backend.tallybot_back.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Getter
-@Setter
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "settlement")
 public class Settlement {
 
@@ -41,9 +39,48 @@ public class Settlement {
             cascade = CascadeType.ALL,
             fetch = FetchType.LAZY,
             orphanRemoval = true)
-    private Set<Participant> participants; // 정산 대상자
+    private Set<Participant> participants = new HashSet<>(); // 정산 대상자
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "calculate_id", nullable = false)
     private Calculate calculate;
+
+     public static Settlement create(UserGroup userGroup, Member payer, Calculate calculate,
+                                    String place, String item, int amount) {
+        Settlement s = new Settlement();
+        s.userGroup = userGroup;
+        s.payer = payer;
+        s.calculate = calculate;
+        s.place = place;
+        s.item = item;
+        s.amount = amount;
+        return s;
+    }
+
+    public void correctPayer(Member correctedPayer) {
+        this.payer = correctedPayer;
+    }
+
+
+    public void changePlace(String place) {
+        this.place = place;
+    }
+
+    public void changeItem(String item) {
+        this.item = item;
+    }
+
+    public void changeAmount(int amount) {
+        this.amount = amount;
+    }
+
+    public void addParticipant(Participant participant) {
+        this.participants.add(participant);
+        participant.attachTo(this); // Participant 쪽에 메서드 추가 권장(아래 참고)
+    }
+
+    public void removeParticipant(Participant participant) {
+        this.participants.remove(participant);
+        participant.detach(); // orphanRemoval 고려
+    }
 }

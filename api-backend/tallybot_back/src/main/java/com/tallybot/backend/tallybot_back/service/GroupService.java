@@ -28,14 +28,15 @@ public class GroupService {
 
     public GroupCreateResponse createGroupWithMember(GroupCreateRequest request) {
         UserGroup userGroup = groupRepository.findById(request.getGroupId())
-                .orElseGet(() -> groupRepository.save(new UserGroup(request.getGroupId(), request.getGroupName())));
+                .orElseGet(() -> groupRepository.save(UserGroup.create(request.getGroupId(), request.getGroupName())));
 
         // 중복 멤버 확인
         boolean exists = memberRepository.existsByUserGroupAndNickname(userGroup, request.getMember());
         if (!exists) {
-            Member member = new Member();
-            member.setUserGroup(userGroup);
-            member.setNickname(request.getMember());
+            Member member = Member.builder()
+            .nickname(request.getMember())
+            .userGroup(userGroup)
+            .build();
             memberRepository.save(member);
         }
 

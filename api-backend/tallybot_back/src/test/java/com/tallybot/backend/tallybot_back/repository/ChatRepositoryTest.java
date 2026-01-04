@@ -45,7 +45,13 @@ class ChatRepositoryTest extends DatabaseTestBase {
     private GenericBulkFactory.Builder4<Chat, UserGroup, LocalDateTime, Member, String> chatFactory
             = new GenericBulkFactory.Builder4<>(
             (UserGroup a, LocalDateTime b, Member c, String d)
-                    -> new Chat(null, a, b, c, d));
+                -> Chat.builder()
+                    .userGroup(a)
+                    .timestamp(b)
+                    .member(c)
+                    .message(d)
+                    .build()
+        );
 
     @BeforeEach
     void setUp() {
@@ -157,9 +163,14 @@ class ChatRepositoryTest extends DatabaseTestBase {
 
         userGroupMembers.get(1).add(memberRepository.save(member));
 
-        List<Chat> l = chatRepository.saveAll(List.of(new Chat(null, userGroups.get(2)
-                , LocalDateTime.of(2024, 2, 8, 12, 40)
-                , userGroupMembers.get(2).get(1), "야 내일 뭐하냐?")));
+        List<Chat> l = chatRepository.saveAll(List.of(
+                Chat.builder()
+                    .userGroup(userGroups.get(2))
+                    .timestamp(LocalDateTime.of(2024, 2, 8, 12, 40))
+                    .member(userGroupMembers.get(2).get(1))
+                    .message("야 내일 뭐하냐?")
+                    .build()
+                ));
 
         List<Chat> l2 = chatFactory
                 .add(userGroups.get(1), LocalDateTime.of(2024, 2, 8, 12, 40)
@@ -178,9 +189,14 @@ class ChatRepositoryTest extends DatabaseTestBase {
                         , userGroupMembers.get(1).get(2), "AAAAAAAA")
                 .saveAllWith(chatRepository);
 
-        List<Chat> l3 = chatRepository.saveAll(List.of(new Chat(null, userGroups.get(2)
-                , LocalDateTime.of(2024, 2, 10, 0, 8)
-                , userGroupMembers.get(0).get(1), "야 내일 뭐하냐?")));
+        List<Chat> l3 = chatRepository.saveAll(List.of(
+                Chat.builder()
+                    .userGroup(userGroups.get(2))
+                    .timestamp(LocalDateTime.of(2024, 2, 10, 0, 8))
+                    .member(userGroupMembers.get(0).get(1))
+                    .message("야 내일 뭐하냐?")
+                    .build()
+        ));
 
         l.addAll(l2);
         l.addAll(l3);

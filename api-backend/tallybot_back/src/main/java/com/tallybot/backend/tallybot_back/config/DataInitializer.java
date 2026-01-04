@@ -24,7 +24,7 @@ public class DataInitializer implements CommandLineRunner {
 
     private final GroupRepository groupRepository;
     private final MemberRepository memberRepository;
-    private final CalculateRepository calculateRepository;
+    // private final CalculateRepository calculateRepository;
     private final SettlementRepository settlementRepository;
     private final ParticipantRepository participantRepository;
     private final CalculateDetailRepository calculateDetailRepository;
@@ -35,15 +35,24 @@ public class DataInitializer implements CommandLineRunner {
         if (groupRepository.count() > 0) return;
 
         // 1. 테스트 시나리오를 위한 id 설정
-        UserGroup group = new UserGroup();
-        group.setGroupId(1L);
-        group.setGroupName("치킨모임");
+        UserGroup group = UserGroup.create(1L, "치킨모임");
         groupRepository.save(group);
 
         // 2. 멤버 생성
-        Member m1 = new Member(null, "지우", group);
-        Member m2 = new Member(null, "현우", group);
-        Member m3 = new Member(null, "은비", group);
+        Member m1 = Member.builder()
+            .nickname("지우")
+            .userGroup(group)
+            .build();
+
+        Member m2 = Member.builder()
+            .nickname("현우")
+            .userGroup(group)
+            .build();
+
+        Member m3 = Member.builder()
+            .nickname("은비")
+            .userGroup(group)
+            .build();    
         memberRepository.saveAll(Set.of(m1, m2, m3));
 
         List<Member> members = List.of(m1, m2, m3);
@@ -58,41 +67,46 @@ public class DataInitializer implements CommandLineRunner {
 
     private void createCalculateWithSettlements(UserGroup group, List<Member> members, CalculateStatus status, String label) {
         // Calculate 생성
-        Calculate calculate = new Calculate();
-        calculate.setUserGroup(group);
-        calculate.setStartTime(LocalDateTime.now().minusHours(2));
-        calculate.setEndTime(LocalDateTime.now());
-        calculate.setStatus(status);
-        calculateRepository.save(calculate);
+        Calculate calculate = Calculate.builder()
+            .startTime(LocalDateTime.now().minusHours(2))
+            .endTime(LocalDateTime.now())
+            .status(status)
+            .userGroup(group)
+            .build();
 
         // Settlement 3개 생성
         for (int i = 0; i < 3; i++) {
-            Settlement settlement = new Settlement();
-            settlement.setUserGroup(group);
-            settlement.setPayer(members.get(i % members.size()));
-            settlement.setPlace(label + "_Place" + (i + 1));
-            settlement.setItem(label + "_Item" + (i + 1));
-            settlement.setAmount(30000 + i * 5000);
-            settlement.setCalculate(calculate);
+
+            Settlement settlement = Settlement.create(
+                group,
+                members.get(i % members.size()),
+                calculate,
+                label + "_Place" + (i + 1),
+                label + "_Item" + (i + 1),
+                30000 + i * 5000
+            );
+
             settlementRepository.save(settlement);
 
             // Participant 3명 등록
             for (Member member : members) {
-                Participant participant = new Participant();
-                Participant.ParticipantKey key = new Participant.ParticipantKey(settlement, member);
-                participant.setParticipantKey(key);
-                participant.setConstant(10000);
+                Participant participant = new Participant(); 
+                Participant.ParticipantKey key = new Participant.ParticipantKey(settlement, member); 
+                participant.setParticipantKey(key); 
+                participant.setConstant(10000); 
                 participant.setRatio(new Ratio(1));
                 participantRepository.save(participant);
             }
         }
 
         // CalculateDetail 생성
-        CalculateDetail detail = new CalculateDetail();
-        detail.setCalculate(calculate);
-        detail.setPayer(members.get(1)); // 현우
-        detail.setPayee(members.get(0)); // 지우
-        detail.setAmount(10000);
+        CalculateDetail detail = CalculateDetail.builder()
+            .calculate(calculate)
+            .payer(members.get(1))   // 현우
+            .payee(members.get(0))   // 지우
+            .amount(10000)
+            .build();
+
         calculateDetailRepository.save(detail);
     }
 }

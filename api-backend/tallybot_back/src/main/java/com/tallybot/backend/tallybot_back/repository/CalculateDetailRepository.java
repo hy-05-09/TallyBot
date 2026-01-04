@@ -13,6 +13,10 @@ public interface CalculateDetailRepository extends JpaRepository<CalculateDetail
 
     List<CalculateDetail> findByCalculate(Calculate calculate);
     List<CalculateDetail> findAllByCalculate(Calculate calculate);
+    List<CalculateDetail> findAllByCalculate_CalculateId(Long calculateId);
+
     void deleteByCalculate(Calculate calculate);
+    void deleteByCalculate_CalculateId(Long calculateId);
+
 
 }

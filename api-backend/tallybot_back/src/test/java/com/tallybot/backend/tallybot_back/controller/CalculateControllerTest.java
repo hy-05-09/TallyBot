@@ -14,6 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDateTime;
@@ -44,6 +45,9 @@ class CalculateControllerTest {
 
     @MockitoBean
     private CalculateDetailRepository calculateDetailRepository;
+
+    @MockitoBean
+    private MemberRepository memberRepository;
 
     @MockitoBean
     private SettlementRepository settlementRepository;
@@ -116,10 +120,13 @@ class CalculateControllerTest {
         UserGroup userGroup = new UserGroup();
         userGroup.setGroupId(42L);
 
-        Calculate calculate = new Calculate();
-        calculate.setCalculateId(101L);
-        calculate.setUserGroup(userGroup);
-        calculate.setStatus(CalculateStatus.COMPLETED);
+        Calculate calculate = Calculate.builder()
+                .status(CalculateStatus.COMPLETED)
+                .userGroup(userGroup)
+                .build();
+
+        Calculate saved = calculateRepository.save(calculate);
+        Long id = saved.getCalculateId();
 
         List<TransferDto> transfers = List.of(
                 new TransferDto(1001L, 1002L, 12000),
@@ -129,19 +136,19 @@ class CalculateControllerTest {
 
         BotResponseDto responseDto = new BotResponseDto(
                 "https://tallybot.me/42",
-                "https://tallybot.me/42/101",
+                "https://tallybot.me/42/" + id,
                 transfers
         );
 
         // when
-        Mockito.when(calculateRepository.findById(101L)).thenReturn(Optional.of(calculate));
+        Mockito.when(calculateRepository.findById(id)).thenReturn(Optional.of(calculate));
         Mockito.when(calculateService.botResultReturn(calculate)).thenReturn(responseDto);
 
         // then
-        mockMvc.perform(get("/api/calculate/101/brief-result"))
+        mockMvc.perform(get("/api/calculate/"+id+"/brief-result"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.groupUrl").value("https://tallybot.me/42"))
-                .andExpect(jsonPath("$.calculateUrl").value("https://tallybot.me/42/101"))
+                .andExpect(jsonPath("$.calculateUrl").value("https://tallybot.me/42/"+id))
                 .andExpect(jsonPath("$.transfers[0].payerId").value(1001));
     }
 
@@ -150,14 +157,15 @@ class CalculateControllerTest {
     void getBotResult_calculating() throws Exception {
         // given
         Calculate calculate = new Calculate();
-        calculate.setCalculateId(101L);
-        calculate.setStatus(CalculateStatus.CALCULATING);
+        Calculate saved = calculateRepository.save(calculate);
+        Long id = saved.getCalculateId();
+        calculate.changeStatus(CalculateStatus.CALCULATING);
 
         // when
-        Mockito.when(calculateRepository.findById(101L)).thenReturn(Optional.of(calculate));
+        Mockito.when(calculateRepository.findById(id)).thenReturn(Optional.of(calculate));
 
         // then
-        mockMvc.perform(get("/api/calculate/101/brief-result"))
+        mockMvc.perform(get("/api/calculate/"+id+"/brief-result"))
                 .andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.message").value("Calculate result is still being processed. Please try again later."));
     }
@@ -187,23 +195,27 @@ class CalculateControllerTest {
     void getSettlementList_success() throws Exception {
         // given
         Calculate calculate = new Calculate();
-        calculate.setCalculateId(101L);
+        Calculate saved = calculateRepository.save(calculate);
+        Long id = saved.getCalculateId();
 
-        Member payer = new Member();
-        payer.setMemberId(1001L);
+        Member payer = Member.builder()
+            .build();
 
-        Member participant1 = new Member();
-        participant1.setMemberId(1001L);
+        Member participant1 = Member.builder()
+            .build();
 
-        Member participant2 = new Member();
-        participant2.setMemberId(1002L);
 
-        Settlement settlement = new Settlement();
-        settlement.setSettlementId(11L);
-        settlement.setPlace("카페");
-        settlement.setItem("커피");
-        settlement.setAmount(10000);
-        settlement.setPayer(payer);
+        Member participant2 = Member.builder()
+            .build();
+
+        Settlement settlement = Settlement.create(
+                new UserGroup(),
+                payer,
+                calculate,
+                "카페",
+                "커피",
+                10000
+        );
 
         Participant.ParticipantKey pk1 = new Participant.ParticipantKey();
         pk1.setSettlement(settlement);
@@ -223,19 +235,20 @@ class CalculateControllerTest {
         p2.setConstant(0);
         p2.setRatio(new Ratio(2));
 
-        settlement.setParticipants(Set.of(p1, p2));
+        settlement.addParticipant(p1);
+        settlement.addParticipant(p2);
 
-        when(calculateRepository.findById(101L)).thenReturn(Optional.of(calculate));
+        when(calculateRepository.findById(id)).thenReturn(Optional.of(calculate));
         when(settlementRepository.findByCalculate(calculate)).thenReturn(List.of(settlement));
 
         // when & then
-        mockMvc.perform(get("/api/calculate/101/settlements"))
+        mockMvc.perform(get("/api/calculate/"+id+"/settlements"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.settlementCount").value(1))
-                .andExpect(jsonPath("$.settlements[0].settlementId").value(11))
+                .andExpect(jsonPath("$.settlements[0].settlementId").value(settlement.getSettlementId()))
                 .andExpect(jsonPath("$.settlements[0].place").value("카페"))
-                .andExpect(jsonPath("$.settlements[0].ratios['1001']").value(1))
-                .andExpect(jsonPath("$.settlements[0].ratios['1002']").value(2))
+                .andExpect(jsonPath("$.settlements[0].ratios[p1.getMemberId()]").value(1))
+                .andExpect(jsonPath("$.settlements[0].ratios[p2.getMemberId()]").value(2))
                 .andExpect(jsonPath("$.settlements[0].ratioSum").value(3));
     }
 
@@ -267,26 +280,53 @@ class CalculateControllerTest {
     void getTransferList_success() throws Exception {
         // given
         Calculate calculate = new Calculate();
-        calculate.setCalculateId(101L);
+        Calculate saved = calculateRepository.save(calculate);
+        Long id = saved.getCalculateId();
 
-        Member payer1 = new Member(); payer1.setMemberId(1001L);
-        Member payee1 = new Member(); payee1.setMemberId(1002L);
-        Member payer2 = new Member(); payer2.setMemberId(1004L);
-        Member payee2 = new Member(); payee2.setMemberId(1002L);
-        Member payer3 = new Member(); payer3.setMemberId(1003L);
-        Member payee3 = new Member(); payee3.setMemberId(1004L);
+        Member payer1 = Member.builder().build();
+        ReflectionTestUtils.setField(payer1, "memberId", 1001L);
 
-        CalculateDetail d1 = new CalculateDetail(); d1.setPayer(payer1); d1.setPayee(payee1); d1.setAmount(12000);
-        CalculateDetail d2 = new CalculateDetail(); d2.setPayer(payer2); d2.setPayee(payee2); d2.setAmount(8000);
-        CalculateDetail d3 = new CalculateDetail(); d3.setPayer(payer3); d3.setPayee(payee3); d3.setAmount(5000);
+        Member payee1 = Member.builder().build();
+        ReflectionTestUtils.setField(payee1, "memberId", 1002L);
+
+        Member payer2 = Member.builder().build();
+        ReflectionTestUtils.setField(payer2, "memberId", 1004L);
+
+        Member payee2 = Member.builder().build();
+        ReflectionTestUtils.setField(payee2, "memberId", 1002L);
+
+        Member payer3 = Member.builder().build();
+        ReflectionTestUtils.setField(payer3, "memberId", 1003L);
+
+        Member payee3 = Member.builder().build();
+        ReflectionTestUtils.setField(payee3, "memberId", 1004L);
+
+
+        CalculateDetail d1 = CalculateDetail.builder()
+            .payer(payer1)
+            .payee(payee1)
+            .amount(12000)
+            .build();
+        
+        CalculateDetail d2 = CalculateDetail.builder()
+            .payer(payer2)
+            .payee(payee2)
+            .amount(8000)
+            .build();
+
+        CalculateDetail d3 = CalculateDetail.builder()
+            .payer(payer3)
+            .payee(payee3)
+            .amount(5000)
+            .build();
 
         // when
-        Mockito.when(calculateRepository.findById(101L)).thenReturn(Optional.of(calculate));
+        Mockito.when(calculateRepository.findById(id)).thenReturn(Optional.of(calculate));
         Mockito.when(calculateDetailRepository.findAllByCalculate(calculate))
                 .thenReturn(List.of(d1, d2, d3));
 
         // then
-        mockMvc.perform(get("/api/calculate/101/transfers"))
+        mockMvc.perform(get("/api/calculate/"+id+"/transfers"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.transferCount").value(3))
                 .andExpect(jsonPath("$.transfers[0].payerId").value(1001))
@@ -316,14 +356,15 @@ class CalculateControllerTest {
     @DisplayName("200 ok : 정산 완료 처리 성공")
     void completeCalculate_success() throws Exception {
         Calculate calculate = new Calculate();
-        calculate.setCalculateId(101L);
+        Calculate saved = calculateRepository.save(calculate);
+        Long id = saved.getCalculateId();
 
-        when(calculateRepository.findById(101L)).thenReturn(Optional.of(calculate));
+        when(calculateRepository.findById(id)).thenReturn(Optional.of(calculate));
         when(calculateRepository.save(any(Calculate.class))).thenReturn(calculate);
 
         mockMvc.perform(post("/api/calculate/complete")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("calculateId", 101))))
+                        .content(objectMapper.writeValueAsString(Map.of("calculateId", id))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Calculation marked as completed."));
     }
@@ -353,20 +394,19 @@ class CalculateControllerTest {
     @Test
     @DisplayName("200 ok : 재정산 성공")
     void recalculate_success() throws Exception {
-        Long calculateId = 101L;
-
         // Given: 가짜 Calculate 객체와 상태 설정
         Calculate calculate = new Calculate();
-        calculate.setCalculateId(calculateId);
-        calculate.setStatus(CalculateStatus.PENDING);
+        Calculate saved = calculateRepository.save(calculate);
+        Long id = saved.getCalculateId();
+        calculate.changeStatus(CalculateStatus.PENDING);
 
-        when(calculateRepository.findById(calculateId)).thenReturn(Optional.of(calculate));
+        when(calculateRepository.findById(id)).thenReturn(Optional.of(calculate));
         when(calculateRepository.save(any(Calculate.class))).thenReturn(calculate);
-        doNothing().when(calculateService).recalculate(calculateId);
+        doNothing().when(calculateService).recalculate(id);
 
         mockMvc.perform(post("/api/calculate/recalculate")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(Map.of("calculateId", calculateId))))
+                        .content(objectMapper.writeValueAsString(Map.of("calculateId", id))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message").value("Recalculation completed successfully."));
     }

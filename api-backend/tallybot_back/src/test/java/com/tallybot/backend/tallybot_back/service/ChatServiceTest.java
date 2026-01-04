@@ -15,6 +15,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 // import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -39,9 +42,9 @@ class ChatServiceTest {
     void saveChats_success() {
         ChatDto dto = new ChatDto(1L, LocalDateTime.now(), 1001L, "테스트");
 
-        UserGroup mockUserGroup = new UserGroup();
-        Member mockMember = new Member();
-        mockMember.setMemberId(1001L);
+        UserGroup mockUserGroup = UserGroup.create(1L, "치킨모임");
+        Member mockMember = Member.builder()
+                .build();
 
         when(groupRepository.findById(anyLong())).thenReturn(Optional.of(mockUserGroup));
         when(memberRepository.findByMemberIdAndUserGroup(anyLong(), eq(mockUserGroup)))

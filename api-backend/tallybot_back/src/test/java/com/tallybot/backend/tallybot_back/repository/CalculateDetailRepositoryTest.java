@@ -133,7 +133,6 @@ class CalculateDetailRepositoryTest extends DatabaseTestBase {
         LocalDateTime endTime = LocalDateTime.of(2024, 11, 9, 13, 0);
 
         Calculate cal0 = Calculate.builder()
-                .calculateId(null)
                 .startTime(startTime)
                 .endTime(endTime)
                 .status(CalculateStatus.CALCULATING)
@@ -142,7 +141,6 @@ class CalculateDetailRepositoryTest extends DatabaseTestBase {
         calculateRepository.save(cal0);
 
         Calculate cal1 = Calculate.builder()
-                .calculateId(null)
                 .startTime(startTime)
                 .endTime(endTime)
                 .status(CalculateStatus.PENDING)
@@ -180,14 +178,14 @@ class CalculateDetailRepositoryTest extends DatabaseTestBase {
         // when
         List<CalculateDetail> cds00 = calculateDetailRepository.findAllByCalculate(cal0);
         List<CalculateDetail> cds01 = calculateDetailRepository.findAllByCalculate(cal1);
-        List<CalculateDetail> cds02 = calculateDetailRepository.findAllByCalculate(Calculate.builder().calculateId(cal0.getCalculateId() + 8081).build());
+        List<CalculateDetail> cds02 = calculateDetailRepository.findAllByCalculate_CalculateId(cal0.getCalculateId() + 8081);
 
         calculateDetailRepository.deleteByCalculate(cal1);
-        calculateDetailRepository.deleteByCalculate(Calculate.builder().calculateId(cal0.getCalculateId() + 8081).build());
+        calculateDetailRepository.deleteByCalculate(calculateDetailRepository.findAllByCalculate_CalculateId(cal0.getCalculateId() + 8081));
 
         List<CalculateDetail> cds10 = calculateDetailRepository.findAllByCalculate(cal0);
         List<CalculateDetail> cds11 = calculateDetailRepository.findAllByCalculate(cal1);
-        List<CalculateDetail> cds12 = calculateDetailRepository.findAllByCalculate(Calculate.builder().calculateId(cal0.getCalculateId() + 8081).build());
+        List<CalculateDetail> cds12 = calculateDetailRepository.findAllByCalculate_CalculateId(cal0.getCalculateId() + 8081);
 
         // then
         assertThat(cds00).contains(cd0).hasSize(1);

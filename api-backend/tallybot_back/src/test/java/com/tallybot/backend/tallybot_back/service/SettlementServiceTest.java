@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -61,24 +62,25 @@ public class SettlementServiceTest {
         request.setRatios(Map.of("1001", 0, "1002", 1, "1003", 1));
         request.setSum(2);
 
-        Member payer = new Member();
-        payer.setMemberId(1001L);
-        UserGroup userGroup = new UserGroup();
-        payer.setUserGroup(userGroup);
+        UserGroup userGroup = UserGroup.create(1L, "치킨모임");
+        Member payer = Member.builder()
+                .userGroup(userGroup)
+                .build();
 
-        Member m2 = new Member();
-        m2.setMemberId(1002L);
-        Member m3 = new Member();
-        m3.setMemberId(1003L);
+        Member m2 = Member.builder()
+            .build();
 
-        when(memberRepository.findById(1001L)).thenReturn(Optional.of(payer));
-        when(memberRepository.findAllById(List.of(1002L, 1003L))).thenReturn(List.of(m2, m3));
+        Member m3 = Member.builder()
+            .build();
+
+        when(memberRepository.findById(payer.getMemberId())).thenReturn(Optional.of(payer));
+        when(memberRepository.findAllById(List.of(m2.getMemberId(), m3.getMemberId()))).thenReturn(List.of(m2, m3));
 
 
         when(calculateRepository.findById(1L)).thenReturn(Optional.of(new Calculate()));
         when(settlementRepository.save(Mockito.<Settlement>any())).thenAnswer(invocation -> {
             Settlement s = invocation.getArgument(0);
-            s.setSettlementId(123L); // 테스트용 ID
+            ReflectionTestUtils.setField(s, "settlementId", 123L);
             return s;
         });
 
@@ -92,20 +94,23 @@ public class SettlementServiceTest {
 
     @Test
     void addSettlement_success_withoutParticipants_defaults() {
-        Member payer = new Member();
-        payer.setMemberId(1001L);
         UserGroup userGroup = new UserGroup();
-        payer.setUserGroup(userGroup);
+        Member payer = Member.builder()
+            .nickname("지우")
+            .userGroup(userGroup)
+            .build();
 
-        Member m1 = new Member(); m1.setMemberId(1002L);
-        Member m2 = new Member(); m2.setMemberId(1004L);
+        Member m1 = Member.builder()
+            .build();
+        Member m2 = Member.builder()
+            .build();
 
-        when(memberRepository.findById(1001L)).thenReturn(Optional.of(payer));
+        when(memberRepository.findById(payer.getMemberId())).thenReturn(Optional.of(payer));
         when(memberRepository.findByUserGroup(userGroup)).thenReturn(List.of(m1, m2));
         when(calculateRepository.findById(42L)).thenReturn(Optional.of(new Calculate()));
         when(settlementRepository.save(Mockito.<Settlement>any())).thenAnswer(invocation -> {
             Settlement s = invocation.getArgument(0);
-            s.setSettlementId(456L); // 테스트용 ID
+            ReflectionTestUtils.setField(s, "settlementId", 456L);
             return s;
         });
 
@@ -142,10 +147,10 @@ public class SettlementServiceTest {
         request.setNewValue(Map.of("amount", 10000, "payer", 1001));
         request.setConstants(Map.of("1001", 5000));
 
-        Member payer = new Member();
-        payer.setMemberId(1001L);
-        payer.setUserGroup(new UserGroup());  // 그룹도 필요
-        when(memberRepository.findById(1001L)).thenReturn(Optional.of(payer));
+        Member payer = Member.builder()
+            .userGroup(UserGroup.create(1L, "치킨모임"))
+            .build();
+        when(memberRepository.findById(payer.getMemberId())).thenReturn(Optional.of(payer));
 
         assertThatThrownBy(() -> settlementService.applySettlementUpdate(request))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -154,20 +159,21 @@ public class SettlementServiceTest {
 
     @Test
     void addSettlement_success_participantRatioDefaults() {
-        Member payer = new Member();
-        payer.setMemberId(1001L);
         UserGroup userGroup = new UserGroup();
-        payer.setUserGroup(userGroup);
+        Member payer = Member.builder()
+            .userGroup(userGroup)
+            .build();
+        
 
-        Member participant = new Member();
-        participant.setMemberId(1002L);
+        Member participant = Member.builder()
+            .build();
 
-        when(memberRepository.findById(1001L)).thenReturn(Optional.of(payer));
-        when(memberRepository.findAllById(List.of(1002L))).thenReturn(List.of(participant));
+        when(memberRepository.findById(payer.getMemberId())).thenReturn(Optional.of(payer));
+        when(memberRepository.findAllById(List.of(participant.getMemberId()))).thenReturn(List.of(participant));
         when(calculateRepository.findById(42L)).thenReturn(Optional.of(new Calculate()));
         when(settlementRepository.save(Mockito.any())).thenAnswer(invocation -> {
             Settlement s = invocation.getArgument(0);
-            s.setSettlementId(123L); // 테스트용 ID
+            ReflectionTestUtils.setField(s, "settlementId", 123L);
             return s;
         });
 
@@ -177,7 +183,7 @@ public class SettlementServiceTest {
         request.setNewValue(Map.of(
                 "amount", 10000,
                 "payer", 1001,
-                "participants", List.of(1002L)
+                "participants", List.of(participant.getMemberId())
         ));
         // constants, ratios, sum 모두 누락 (기본값 적용 예상)
         request.setConstants(null);
@@ -190,45 +196,47 @@ public class SettlementServiceTest {
 
     @Test
     void deleteSettlement_success() {
-        Long settlementId = 100L;
         Long calculateId = 1L;
 
         Settlement settlement = new Settlement();
-        settlement.setSettlementId(settlementId);
 
-        when(settlementRepository.findById(settlementId)).thenReturn(Optional.of(settlement));
+        when(settlementRepository.findById(settlement.getSettlementId())).thenReturn(Optional.of(settlement));
 
         SettlementUpdateRequest request = new SettlementUpdateRequest();
         request.setField("delete");
-        request.setSettlementId(settlementId);
+        request.setSettlementId(settlement.getSettlementId());
         request.setCalculateId(calculateId);
 
         Long result = settlementService.applySettlementUpdate(request);
-        assertEquals(settlementId, result);
+        assertEquals(settlement.getSettlementId(), result);
         verify(settlementRepository).delete(settlement);
     }
 
     @Test
     void updateSettlement_success_modifyPlaceAndAmount() {
-        Long settlementId = 101L;
         Long calculateId = 2L;
 
-        Member payer = new Member();
-        payer.setMemberId(2001L);
         UserGroup userGroup = new UserGroup();
-        payer.setUserGroup(userGroup);
+        Member payer = Member.builder()
+            .userGroup(userGroup)
+            .build();
+        Calculate calculate = new Calculate();
 
-        Settlement settlement = new Settlement();
-        settlement.setSettlementId(settlementId);
-        settlement.setPayer(payer);
-        settlement.setPlace("OldPlace");
-        settlement.setAmount(10000);
+        Settlement settlement = Settlement.create(
+                userGroup,
+                payer,
+                calculate,
+                "OldPlace",
+                "",
+                10000
+        );
 
-        when(settlementRepository.findById(settlementId)).thenReturn(Optional.of(settlement));
+
+        when(settlementRepository.findById(settlement.getSettlementId())).thenReturn(Optional.of(settlement));
 
         SettlementUpdateRequest request = new SettlementUpdateRequest();
         request.setField("update");
-        request.setSettlementId(settlementId);
+        request.setSettlementId(settlement.getSettlementId());
         request.setCalculateId(calculateId);
         request.setNewValue(Map.of(
                 "place", "NewPlace",
@@ -237,7 +245,7 @@ public class SettlementServiceTest {
 
         Long result = settlementService.applySettlementUpdate(request);
 
-        assertEquals(settlementId, result);
+        assertEquals(settlement.getSettlementId(), result);
         assertEquals("NewPlace", settlement.getPlace());
         assertEquals(20000, settlement.getAmount());
     }
@@ -246,29 +254,30 @@ public class SettlementServiceTest {
     @DisplayName("✅ toSettlement(): SettlementDto를 Settlement로 정확히 변환한다")
     void toSettlement_success() {
         // given
-        Long calculateId = 1L;
 
         UserGroup userGroup = new UserGroup();
         userGroup.setGroupId(10L);
 
-        Member payer = new Member();
-        payer.setMemberId(1001L);
-        payer.setNickname("준호");
-        payer.setUserGroup(userGroup);
+        Member payer = Member.builder()
+            .nickname("준호")
+            .userGroup(userGroup)
+            .build();
 
-        Member participant1 = new Member();
-        participant1.setMemberId(1002L);
-        participant1.setNickname("소연");
-        participant1.setUserGroup(userGroup);
+        Member participant1 = Member.builder()
+            .nickname("소연")
+            .userGroup(userGroup)
+            .build();
 
-        Member participant2 = new Member();
-        participant2.setMemberId(1003L);
-        participant2.setNickname("민우");
-        participant2.setUserGroup(userGroup);
+        Member participant2 = Member.builder()
+            .nickname("민우")
+            .userGroup(userGroup)
+            .build();
 
-        Calculate calculate = new Calculate();
-        calculate.setCalculateId(calculateId);
-        calculate.setUserGroup(userGroup);
+        Calculate calculate = Calculate.builder()
+            .userGroup(userGroup)
+            .build();
+        Calculate saved = calculateRepository.save(calculate);
+        Long calculateId = saved.getCalculateId();
 
         SettlementDto dto = new SettlementDto();
         dto.setPlace("호텔");
@@ -280,9 +289,9 @@ public class SettlementServiceTest {
 
         // when
         when(calculateRepository.findById(calculateId)).thenReturn(Optional.of(calculate));
-        when(memberRepository.findByMemberIdAndUserGroup(1001L, userGroup)).thenReturn(Optional.of(payer));
-        when(memberRepository.findByMemberIdAndUserGroup(1002L, userGroup)).thenReturn(Optional.of(participant1));
-        when(memberRepository.findByMemberIdAndUserGroup(1003L, userGroup)).thenReturn(Optional.of(participant2));
+        when(memberRepository.findByMemberIdAndUserGroup(payer.getMemberId(), userGroup)).thenReturn(Optional.of(payer));
+        when(memberRepository.findByMemberIdAndUserGroup(participant1.getMemberId(), userGroup)).thenReturn(Optional.of(participant1));
+        when(memberRepository.findByMemberIdAndUserGroup(participant2.getMemberId(), userGroup)).thenReturn(Optional.of(participant2));
 
         Settlement result = settlementService.toSettlement(dto, calculateId);
 
@@ -299,7 +308,6 @@ public class SettlementServiceTest {
     @DisplayName("toSettlements(): SettlementDto 리스트를 Settlement 리스트로 변환한다")
     void toSettlements_success() {
         // given
-        Long calculateId = 1L;
         SettlementDto dto1 = new SettlementDto();
         dto1.setPlace("식당");
         dto1.setItem("점심");
@@ -310,21 +318,23 @@ public class SettlementServiceTest {
 
         // 재사용을 위한 기본 데이터 설정
         UserGroup userGroup = new UserGroup();
-        Calculate calculate = new Calculate();
-        calculate.setCalculateId(calculateId);
-        calculate.setUserGroup(userGroup);
+        Calculate calculate = Calculate.builder()
+            .userGroup(userGroup)
+            .build();
+        Calculate saved = calculateRepository.save(calculate);
+        Long calculateId = saved.getCalculateId();
 
-        Member payer = new Member();
-        payer.setMemberId(1001L);
-        payer.setUserGroup(userGroup);
+        Member payer = Member.builder()
+            .userGroup(userGroup)
+            .build();
 
-        Member participant = new Member();
-        participant.setMemberId(1002L);
-        participant.setUserGroup(userGroup);
+        Member participant = Member.builder()
+            .userGroup(userGroup)
+            .build();
 
         when(calculateRepository.findById(calculateId)).thenReturn(Optional.of(calculate));
-        when(memberRepository.findByMemberIdAndUserGroup(1001L, userGroup)).thenReturn(Optional.of(payer));
-        when(memberRepository.findByMemberIdAndUserGroup(1002L, userGroup)).thenReturn(Optional.of(participant));
+        when(memberRepository.findByMemberIdAndUserGroup(payer.getMemberId(), userGroup)).thenReturn(Optional.of(payer));
+        when(memberRepository.findByMemberIdAndUserGroup(participant.getMemberId(), userGroup)).thenReturn(Optional.of(participant));
 
         // when
         List<Settlement> result = settlementService.toSettlements(List.of(dto1), calculateId);

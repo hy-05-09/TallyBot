@@ -62,18 +62,17 @@ class CalculateRepositoryTest extends DatabaseTestBase {
     @DisplayName("calculate 조회")
     void saveAndCaculateQuery() {
         // given
-        UserGroup userGroup0 = new UserGroup(1753L,"새로운 톡방");
+        UserGroup userGroup0 = UserGroup.create(1753L,"새로운 톡방");
         groupRepository.save(userGroup0);
-        UserGroup userGroup1 = new UserGroup(2782L, "2019 17기 Withme");
+        UserGroup userGroup1 = UserGroup.create(2782L, "2019 17기 Withme");
         groupRepository.save(userGroup1);
-        UserGroup userGroup2 = new UserGroup(33038L, "삼겹살집 번개모임");
+        UserGroup userGroup2 = UserGroup.create(33038L, "삼겹살집 번개모임");
         groupRepository.save(userGroup2);
 
         LocalDateTime startTime = LocalDateTime.of(2024, 11, 8, 13, 0);
         LocalDateTime endTime = LocalDateTime.of(2024, 11, 9, 13, 0);
 
         Calculate cal0 = Calculate.builder()
-                .calculateId(null)
                 .startTime(startTime)
                 .endTime(endTime)
                 .status(CalculateStatus.CALCULATING)
@@ -82,7 +81,6 @@ class CalculateRepositoryTest extends DatabaseTestBase {
         calculateRepository.save(cal0);
 
         Calculate cal1 = Calculate.builder()
-                .calculateId(null)
                 .startTime(startTime)
                 .endTime(endTime)
                 .status(CalculateStatus.PENDING)
@@ -91,7 +89,6 @@ class CalculateRepositoryTest extends DatabaseTestBase {
         calculateRepository.save(cal1);
 
         Calculate cal2 = Calculate.builder()
-                .calculateId(null)
                 .startTime(startTime)
                 .endTime(endTime)
                 .status(CalculateStatus.COMPLETED)
@@ -100,7 +97,6 @@ class CalculateRepositoryTest extends DatabaseTestBase {
         calculateRepository.save(cal2);
 
         Calculate cal3 = Calculate.builder()
-                .calculateId(null)
                 .startTime(startTime)
                 .endTime(endTime)
                 .status(CalculateStatus.PENDING)
@@ -109,7 +105,6 @@ class CalculateRepositoryTest extends DatabaseTestBase {
         calculateRepository.save(cal3);
 
         Calculate cal4 = Calculate.builder()
-                .calculateId(null)
                 .startTime(startTime)
                 .endTime(endTime)
                 .status(CalculateStatus.CALCULATING)
@@ -125,7 +120,7 @@ class CalculateRepositoryTest extends DatabaseTestBase {
         List<Calculate> find0 = calculateRepository.findByUserGroup(userGroup0);
         List<Calculate> find1 = calculateRepository.findByUserGroup(userGroup1);
         List<Calculate> find2 = calculateRepository.findByUserGroup(userGroup2);
-        List<Calculate> findNo = calculateRepository.findByUserGroup(new UserGroup(userGroup0.getGroupId() + 1, userGroup0.getGroupName()));
+        List<Calculate> findNo = calculateRepository.findByUserGroup(UserGroup.create(userGroup0.getGroupId() + 1, userGroup0.getGroupName()));
 
         Optional<Calculate> id0 = calculateRepository.findById(cal0.getCalculateId());
         Optional<Calculate> id1 = calculateRepository.findById(cal1.getCalculateId());

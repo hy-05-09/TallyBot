@@ -187,7 +187,7 @@ public class CalculateController {
         }
 
         // 상태 변경
-        calculate.setStatus(CalculateStatus.COMPLETED);
+        calculate.changeStatus(CalculateStatus.COMPLETED);
         calculateRepository.save(calculate);
 
         return ResponseEntity.ok(new MessageResponse("Calculation marked as completed."));
@@ -211,7 +211,7 @@ public class CalculateController {
                     .body(new ErrorResponse("Calculate entity not found."));
         }
 
-        calculate.setStatus(CalculateStatus.CALCULATING);
+        calculate.changeStatus(CalculateStatus.CALCULATING);
         calculateRepository.save(calculate);
 
         calculateService.recalculate(request.getCalculateId());

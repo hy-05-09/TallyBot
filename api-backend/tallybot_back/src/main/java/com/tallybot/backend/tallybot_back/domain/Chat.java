@@ -7,10 +7,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "chat")
 public class Chat {
 
@@ -32,4 +29,15 @@ public class Chat {
 
     @Column(name = "message", nullable = false, columnDefinition = "MEDIUMTEXT")
     private String message;
+
+    @Builder
+    private Chat(UserGroup userGroup,
+                 LocalDateTime timestamp,
+                 Member member,
+                 String message) {
+        this.userGroup = userGroup;
+        this.timestamp = timestamp;
+        this.member = member;
+        this.message = message;
+    }
 }

@@ -163,15 +163,15 @@ class UserGroupControllerTest {
         userGroup.setGroupId(42L);
         userGroup.setGroupName("정산방");
 
-        Member m1 = new Member();
-        m1.setMemberId(1L);
-        m1.setNickname("철수");
-        m1.setUserGroup(userGroup);
+        Member m1 = Member.builder()
+                .nickname("철수")
+                .userGroup(userGroup)
+                .build();
 
-        Member m2 = new Member();
-        m2.setMemberId(2L);
-        m2.setNickname("영희");
-        m2.setUserGroup(userGroup);
+        Member m2 = Member.builder()
+                .nickname("영희")
+                .userGroup(userGroup)
+                .build();
 
         Mockito.when(groupRepository.findById(42L)).thenReturn(Optional.of(userGroup));
         Mockito.when(memberRepository.findByUserGroup(userGroup)).thenReturn(List.of(m1, m2));
@@ -179,9 +179,9 @@ class UserGroupControllerTest {
         // when & then
         mockMvc.perform(get("/api/group/42/members"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].memberId").value(1))
+                .andExpect(jsonPath("$[0].memberId").value(m1.getMemberId()))
                 .andExpect(jsonPath("$[0].nickname").value("철수"))
-                .andExpect(jsonPath("$[1].memberId").value(2))
+                .andExpect(jsonPath("$[1].memberId").value(m2.getMemberId()))
                 .andExpect(jsonPath("$[1].nickname").value("영희"));
     }
 
@@ -211,17 +211,25 @@ class UserGroupControllerTest {
         userGroup.setGroupId(42L);
         userGroup.setGroupName("정산방");
 
-        Calculate c1 = new Calculate();
-        c1.setCalculateId(101L);
-        c1.setStartTime(LocalDateTime.of(2025, 5, 8, 11, 0));
-        c1.setEndTime(LocalDateTime.of(2025, 5, 8, 13, 0));
-        c1.setStatus(CalculateStatus.PENDING);
+        Calculate c1 = Calculate.builder()
+                .startTime(LocalDateTime.of(2025, 5, 8, 11, 0))
+                .endTime(LocalDateTime.of(2025, 5, 8, 13, 0))
+                .status(CalculateStatus.PENDING)
+                .userGroup(userGroup)
+                .build();
 
-        Calculate c2 = new Calculate();
-        c2.setCalculateId(102L);
-        c2.setStartTime(LocalDateTime.of(2025, 5, 9, 10, 0));
-        c2.setEndTime(LocalDateTime.of(2025, 5, 9, 12, 0));
-        c2.setStatus(CalculateStatus.COMPLETED);
+        Calculate saved1 = calculateRepository.save(c1);
+        Long id1 = saved1.getCalculateId();
+
+        Calculate c2 = Calculate.builder()
+                .startTime(LocalDateTime.of(2025, 5, 9, 10, 0))
+                .endTime(LocalDateTime.of(2025, 5, 9, 12, 0))
+                .status(CalculateStatus.COMPLETED)
+                .userGroup(userGroup)
+                .build();
+        
+        Calculate saved2 = calculateRepository.save(c2);
+        Long id2 = saved2.getCalculateId();
 
         // when
         Mockito.when(groupRepository.findById(42L)).thenReturn(Optional.of(userGroup));
@@ -230,9 +238,9 @@ class UserGroupControllerTest {
         // then
         mockMvc.perform(get("/api/group/42/calculates"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].calculateId").value(101))
+                .andExpect(jsonPath("$[0].calculateId").value(id1))
                 .andExpect(jsonPath("$[0].status").value("PENDING"))
-                .andExpect(jsonPath("$[1].calculateId").value(102))
+                .andExpect(jsonPath("$[1].calculateId").value(id2))
                 .andExpect(jsonPath("$[1].status").value("COMPLETED"));
     }
 

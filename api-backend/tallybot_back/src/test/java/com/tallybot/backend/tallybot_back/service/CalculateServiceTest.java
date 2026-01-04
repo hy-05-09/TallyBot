@@ -15,7 +15,6 @@ import org.springframework.test.context.ActiveProfiles;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -61,15 +60,16 @@ class CalculateServiceTest {
     void startCalculate_shouldProcessSuccessfully_whenGptReturnsResults() {
         // given
         Long groupId = 1L;
-        Long fakeCalculateId = 100L;
         CalculateRequestDto request = new CalculateRequestDto();
         request.setGroupId(groupId);
         request.setStartTime(LocalDateTime.now().minusDays(1));
         request.setEndTime(LocalDateTime.now());
 
-        UserGroup mockGroup = new UserGroup();
+        UserGroup mockGroup = UserGroup.create(1L, "치킨모임");
         Calculate savedCalculate = new Calculate();
-        savedCalculate.setCalculateId(fakeCalculateId);
+        Calculate saved = calculateRepository.save(savedCalculate);
+        Long fakeCalculateId = saved.getCalculateId();
+
 
         List<Chat> chats = List.of(createChat("A", "샘플 대화"));
 
@@ -93,7 +93,7 @@ class CalculateServiceTest {
         dummyParticipant.setParticipantKey(participantKey);
 
         Settlement dummySettlement = new Settlement();
-        dummySettlement.setParticipants(Set.of(dummyParticipant));
+        dummySettlement.addParticipant(dummyParticipant);
 
         List<Settlement> settlements = List.of(dummySettlement);
 
@@ -122,15 +122,15 @@ class CalculateServiceTest {
     void startCalculate_shouldDeleteCalculate_whenNoSettlementResult() {
         // given
         Long groupId = 1L;
-        Long fakeCalculateId = 100L;
         CalculateRequestDto request = new CalculateRequestDto();
         request.setGroupId(groupId);
         request.setStartTime(LocalDateTime.now().minusDays(1));
         request.setEndTime(LocalDateTime.now());
 
-        UserGroup mockGroup = new UserGroup();
+        UserGroup mockGroup = UserGroup.create(1L, "치킨모임");
         Calculate savedCalculate = new Calculate();
-        savedCalculate.setCalculateId(fakeCalculateId);
+        Calculate saved = calculateRepository.save(savedCalculate);
+        Long fakeCalculateId = saved.getCalculateId();
 
         List<Chat> chats = List.of(createChat("A", "샘플 대화"));
 
@@ -162,11 +162,14 @@ class CalculateServiceTest {
     }
 
     private Chat createChat(String nickname, String message) {
-        Member member = new Member();
-        member.setNickname(nickname);
-        Chat chat = new Chat();
-        chat.setMember(member);
-        chat.setMessage(message);
+        Member member = Member.builder()
+                .nickname(nickname)
+                .build();
+
+        Chat chat = Chat.builder()
+                .member(member)
+                .message(message)
+                .build();
         return chat;
     }
 
@@ -175,21 +178,27 @@ class CalculateServiceTest {
     @DisplayName("recalculate(): 기존 Settlement로 재정산 처리")
     void recalculate_success() {
         // given
-        Long calculateId = 200L;
         Calculate calculate = new Calculate();
-        calculate.setCalculateId(calculateId);
+        Calculate saved = calculateRepository.save(calculate);
+        Long calculateId = saved.getCalculateId();
 
-        Member payer = new Member(); payer.setMemberId(1001L);
-        Member payee = new Member(); payee.setMemberId(1002L);
+        Member payer = Member.builder()
+                .build();
+        Member payee = Member.builder()
+                .build();
 
-        Settlement settlement = new Settlement();
-        settlement.setCalculate(calculate);
-        settlement.setPayer(payer);
-        settlement.setAmount(10000);
+        Settlement settlement = Settlement.create(
+                UserGroup.create(1L, "치킨모임");,
+                payer,
+                calculate,
+                "",
+                "",
+                10000
+        );
 
         Participant.ParticipantKey pk = new Participant.ParticipantKey(settlement, payee);
         Participant participant = new Participant(pk, 0, new Ratio(1, 1));
-        settlement.setParticipants(Set.of(participant));
+        settlement.addParticipant(participant);
 
         // 👉 calculateRepository는 2번 호출되므로 둘 다 처리
         when(calculateRepository.findByCalculateId(calculateId)).thenReturn(Optional.of(calculate));
@@ -209,22 +218,33 @@ class CalculateServiceTest {
     void calculateAndOptimize_success() {
         // given
         UserGroup userGroup = new UserGroup();
-        Member m1 = new Member(); m1.setMemberId(1L); m1.setUserGroup(userGroup);
-        Member m2 = new Member(); m2.setMemberId(2L); m2.setUserGroup(userGroup);
+        Member m1 = Member.builder()
+                .userGroup(userGroup)
+                .build();
+        Member m2 = Member.builder()
+                .userGroup(userGroup)
+                .build();
 
-        Calculate calculate = new Calculate();
-        calculate.setCalculateId(1L);
-        calculate.setUserGroup(userGroup);
+        Calculate calculate = Calculate.builder()
+            .userGroup(userGroup)
+            .build();
+
+        // Calculate saved = calculateRepository.save(calculate);
+        // Long calculateId = saved.getCalculateId();
 
         // 정산 1건
-        Settlement s = new Settlement();
-        s.setCalculate(calculate);
-        s.setAmount(10000);
-        s.setPayer(m1);
+        Settlement s = Settlement.create(
+                userGroup,
+                m1,
+                calculate,
+                "",
+                "",
+                10000
+        );
 
         Participant.ParticipantKey pk = new Participant.ParticipantKey(s, m2);
         Participant participant = new Participant(pk, 0, new Ratio(1, 1));
-        s.setParticipants(Set.of(participant));
+        s.addParticipant(participant);
 
         // when
         calculateService.calculateAndOptimize(List.of(s));
@@ -242,31 +262,35 @@ class CalculateServiceTest {
         UserGroup userGroup = new UserGroup();
         userGroup.setGroupId(42L);
 
-        Calculate calculate = new Calculate();
-        calculate.setCalculateId(101L);
-        calculate.setUserGroup(userGroup);
+        Calculate calculate = Calculate.builder()
+            .userGroup(userGroup)
+            .build();
+        Calculate saved = calculateRepository.save(calculate);
+        Long calculateId = saved.getCalculateId();
 
-        Member payer1 = new Member();
-        payer1.setMemberId(1001L);
-        Member payee1 = new Member();
-        payee1.setMemberId(1002L);
+        Member payer1 = Member.builder()
+                .build();
+        Member payee1 = Member.builder()
+                .build();
 
-        Member payer2 = new Member();
-        payer2.setMemberId(1004L);
-        Member payee2 = new Member();
-        payee2.setMemberId(1002L);
+        Member payer2 = Member.builder()
+                .build();
+        Member payee2 = Member.builder()
+                .build();
 
-        CalculateDetail detail1 = new CalculateDetail();
-        detail1.setCalculate(calculate);
-        detail1.setPayer(payer1);
-        detail1.setPayee(payee1);
-        detail1.setAmount(12000);
+        CalculateDetail detail1 = CalculateDetail.builder()
+            .calculate(calculate)
+            .payer(payer1)
+            .payee(payee1)
+            .amount(12000)
+            .build();
 
-        CalculateDetail detail2 = new CalculateDetail();
-        detail2.setCalculate(calculate);
-        detail2.setPayer(payer2);
-        detail2.setPayee(payee2);
-        detail2.setAmount(8000);
+        CalculateDetail detail2 = CalculateDetail.builder()
+            .calculate(calculate)
+            .payer(payer2)
+            .payee(payee2)
+            .amount(8000)
+            .build();
 
         when(calculateDetailRepository.findAllByCalculate(calculate))
                 .thenReturn(List.of(detail1, detail2));
@@ -276,12 +300,12 @@ class CalculateServiceTest {
 
         // then
         assertThat(result.getGroupUrl()).isEqualTo("https://tallybot.me/42");
-        assertThat(result.getCalculateUrl()).isEqualTo("https://tallybot.me/42/101");
+        assertThat(result.getCalculateUrl()).isEqualTo("https://tallybot.me/42/"+calculateId);
 
         List<TransferDto> transfers = result.getTransfers();
         assertThat(transfers).hasSize(2);
-        assertThat(transfers.get(0).getPayerId()).isEqualTo(1001L);
-        assertThat(transfers.get(0).getPayeeId()).isEqualTo(1002L);
+        assertThat(transfers.get(0).getPayerId()).isEqualTo(payer1.getMemberId());
+        assertThat(transfers.get(0).getPayeeId()).isEqualTo(payee1.getMemberId());
         assertThat(transfers.get(0).getAmount()).isEqualTo(12000);
     }
 

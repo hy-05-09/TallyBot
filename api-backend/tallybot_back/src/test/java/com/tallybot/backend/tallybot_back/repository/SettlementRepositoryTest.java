@@ -78,22 +78,18 @@ public class SettlementRepositoryTest extends DatabaseTestBase {
             userGroupMembers.add(new ArrayList<>());
         }
 
-        UserGroup group = UserGroup.builder()
-                .groupId(8810L)
-                .groupName("새로운 톡방")
-                .build();
+        UserGroup group = UserGroup.create(
+                8810L,"새로운 톡방"
+        );
 
         userGroups.set(0, groupRepository.save(group));
 
-        group = UserGroup.builder()
-                .groupId(4042L)
-                .groupName("2019 17기 Withme")
-                .build();
-
+        group = UserGroup.create(
+                4042L, "2019 17기 Withme"
+        );
         userGroups.set(1, groupRepository.save(group));
 
         Member member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(0))
                 .nickname("철수")
                 .build();
@@ -101,7 +97,6 @@ public class SettlementRepositoryTest extends DatabaseTestBase {
         userGroupMembers.get(0).add(memberRepository.save(member));
 
         member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(0))
                 .nickname("영희")
                 .build();
@@ -109,7 +104,6 @@ public class SettlementRepositoryTest extends DatabaseTestBase {
         userGroupMembers.get(0).add(memberRepository.save(member));
 
         member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(1))
                 .nickname("철수")
                 .build();
@@ -117,7 +111,6 @@ public class SettlementRepositoryTest extends DatabaseTestBase {
         userGroupMembers.get(1).add(memberRepository.save(member));
 
         member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(1))
                 .nickname("민경")
                 .build();
@@ -125,7 +118,6 @@ public class SettlementRepositoryTest extends DatabaseTestBase {
         userGroupMembers.get(1).add(memberRepository.save(member));
 
         member = Member.builder()
-                .memberId(null)
                 .userGroup(userGroups.get(1))
                 .nickname("정현")
                 .build();
@@ -136,7 +128,6 @@ public class SettlementRepositoryTest extends DatabaseTestBase {
         LocalDateTime endTime = LocalDateTime.of(2024, 11, 9, 13, 0);
 
         Calculate cal0 = Calculate.builder()
-                .calculateId(null)
                 .startTime(startTime)
                 .endTime(endTime)
                 .status(CalculateStatus.CALCULATING)
@@ -145,7 +136,6 @@ public class SettlementRepositoryTest extends DatabaseTestBase {
         calculateRepository.save(cal0);
 
         Calculate cal1 = Calculate.builder()
-                .calculateId(null)
                 .startTime(startTime)
                 .endTime(endTime)
                 .status(CalculateStatus.PENDING)
@@ -153,59 +143,54 @@ public class SettlementRepositoryTest extends DatabaseTestBase {
                 .build();
         calculateRepository.save(cal1);
 
-        Settlement settlement0 = Settlement.builder()
-                .settlementId(null)
-                .place("스타벅스")
-                .item("오늘의 커피")
-                .amount(30000)
-                .userGroup(userGroups.get(0))
-                .payer(userGroupMembers.get(0).get(1))
-                .calculate(cal0)
-                .build();
+        Settlement settlement0 = Settlement.create(
+                userGroups.get(0),
+                userGroupMembers.get(0).get(1),
+                cal0,
+                "스타벅스",
+                "오늘의 커피",
+                30000
+        );
         settlementRepository.save(settlement0);
 
-        Settlement settlement1 = Settlement.builder()
-                .settlementId(null)
-                .place("교보문고")
-                .item("잡지")
-                .amount(16000)
-                .userGroup(userGroups.get(0))
-                .payer(userGroupMembers.get(0).get(0))
-                .calculate(cal0)
-                .build();
+        Settlement settlement1 = Settlement.create(
+                userGroups.get(0),
+                userGroupMembers.get(0).get(0),
+                cal0,
+                "교보문고",
+                "잡지",
+                16000
+        );
         settlementRepository.save(settlement1);
 
-        Settlement settlement2 = Settlement.builder()
-                .settlementId(null)
-                .place("창화당")
-                .item("만두")
-                .amount(20000)
-                .userGroup(userGroups.get(0))
-                .payer(userGroupMembers.get(0).get(0))
-                .calculate(cal0)
-                .build();
+        Settlement settlement2 = Settlement.create(
+                userGroups.get(0),
+                userGroupMembers.get(0).get(0),
+                cal0,
+                "창화당",
+                "만두",
+                20000
+        );
         settlementRepository.save(settlement2);
 
-        Settlement settlement3 = Settlement.builder()
-                .settlementId(null)
-                .place("숙소")
-                .item("숙소")
-                .amount(1160000)
-                .userGroup(userGroups.get(1))
-                .payer(userGroupMembers.get(1).get(2))
-                .calculate(cal1)
-                .build();
+        Settlement settlement3 = Settlement.create(
+                userGroups.get(1),
+                userGroupMembers.get(1).get(2),
+                cal1,
+                "숙소",
+                "숙소",
+                1160000
+        );
         settlementRepository.save(settlement3);
 
-        Settlement settlement4 = Settlement.builder()
-                .settlementId(null)
-                .place("식재료")
-                .item("식재료")
-                .amount(55000)
-                .userGroup(userGroups.get(1))
-                .payer(userGroupMembers.get(1).get(1))
-                .calculate(cal1)
-                .build();
+        Settlement settlement4 = Settlement.create(
+                userGroups.get(1),
+                userGroupMembers.get(1).get(1),
+                cal1,
+                "식재료",
+                "식재료",
+                55000
+        );
         settlementRepository.save(settlement4);
 
         // when

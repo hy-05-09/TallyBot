@@ -5,11 +5,7 @@ import lombok.*;
 
 @Entity
 @Getter
-@Setter
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@EqualsAndHashCode
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "member")
 public class Member {
     @Id
@@ -23,4 +19,10 @@ public class Member {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "group_id", nullable = false)
     private UserGroup userGroup;
+
+    @Builder
+    private Member(String nickname, UserGroup userGroup) {
+        this.nickname = nickname;
+        this.userGroup = userGroup;
+    }
 }

@@ -46,11 +46,13 @@ public class GPTServiceTest {
         m1.setMemberId(1L);
         m1.setNickname("지훈");
 
-        Chat chat1 = new Chat();
-        chat1.setChatId(100L);
-        chat1.setMember(m1);
-        chat1.setMessage("정산하자");
-        chat1.setTimestamp(LocalDateTime.of(2025, 5, 1, 12, 0));
+
+        Chat chat1 = Chat.builder()
+                .member(m1)
+                .timestamp(LocalDateTime.of(2025, 5, 1, 12, 0))
+                .message("정산하자")
+                .build();
+
 
         List<Chat> chats = List.of(chat1);
         List<ChatForGptDto> chatDtos = chats.stream()

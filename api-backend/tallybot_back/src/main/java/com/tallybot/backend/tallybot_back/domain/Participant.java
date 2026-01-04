@@ -25,60 +25,55 @@ public class Participant {
     @Embedded
     private Ratio ratio;
 
-//    @Embeddable
-//    @Getter
-//    @Setter
-//    @NoArgsConstructor
-//    @AllArgsConstructor
-//    @EqualsAndHashCode
-//    public static class ParticipantKey implements Serializable {
-//
-//        @ManyToOne(fetch = FetchType.LAZY)
-//        @JoinColumn(name = "settlement_id", nullable = false)
-//        private Settlement settlement;
-//
-//        @ManyToOne(fetch = FetchType.LAZY)
-//        @JoinColumn(name = "member_id", nullable = false)
-//        private Member member;
-//    }
-@Embeddable
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public static class ParticipantKey implements Serializable {
+    @Embeddable
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ParticipantKey implements Serializable {
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "settlement_id", nullable = false)
-    private Settlement settlement;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "settlement_id", nullable = false)
+        private Settlement settlement;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
+        @ManyToOne(fetch = FetchType.LAZY)
+        @JoinColumn(name = "member_id", nullable = false)
+        private Member member;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ParticipantKey that)) return false;
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof ParticipantKey that)) return false;
 
-        return Objects.equals(
-                this.settlement != null ? this.settlement.getSettlementId() : null,
-                that.settlement != null ? that.settlement.getSettlementId() : null
-        ) &&
-                Objects.equals(
-                        this.member != null ? this.member.getMemberId() : null,
-                        that.member != null ? that.member.getMemberId() : null
-                );
+            return Objects.equals(
+                    this.settlement != null ? this.settlement.getSettlementId() : null,
+                    that.settlement != null ? that.settlement.getSettlementId() : null
+            ) &&
+                    Objects.equals(
+                            this.member != null ? this.member.getMemberId() : null,
+                            that.member != null ? that.member.getMemberId() : null
+                    );
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(
+                    settlement != null ? settlement.getSettlementId() : null,
+                    member != null ? member.getMemberId() : null
+            );
+        }
+
+        
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(
-                settlement != null ? settlement.getSettlementId() : null,
-                member != null ? member.getMemberId() : null
-        );
+    public void attachTo(Settlement settlement) {
+        if (this.participantKey == null) this.participantKey = new ParticipantKey();
+        this.participantKey.setSettlement(settlement);
     }
-}
+
+    public void detach() {
+        if (this.participantKey != null) this.participantKey.setSettlement(null);
+    }
 }
 
 

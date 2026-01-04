@@ -15,8 +15,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 // import java.time.format.DateTimeFormatter;
-import java.util.List;
-
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -80,11 +78,13 @@ public class CalculateService {
         UserGroup userGroup = groupRepository.findById(request.getGroupId())
                 .orElseThrow(() -> new IllegalArgumentException("Group not found"));
 
-        Calculate calculate = new Calculate();
-        calculate.setUserGroup(userGroup);
-        calculate.setStartTime(request.getStartTime());
-        calculate.setEndTime(request.getEndTime());
-        calculate.setStatus(CalculateStatus.CALCULATING);
+        Calculate calculate = Calculate.builder()
+            .startTime(request.getStartTime())
+            .endTime(request.getEndTime())
+            .status(CalculateStatus.CALCULATING)
+            .userGroup(userGroup)
+            .build();
+
         calculate = calculateRepository.save(calculate);
         Long calculateId = calculate.getCalculateId();
 
@@ -261,7 +261,7 @@ public class CalculateService {
         calculateAndOptimize(settlementList);  // 내부적으로 그래프 재생성 포함
 
         // 4. 상태 초기화
-        calculate.setStatus(CalculateStatus.PENDING);
+        calculate.changeStatus(CalculateStatus.PENDING);
         calculateRepository.save(calculate);
     }
 
@@ -277,7 +277,7 @@ public class CalculateService {
         Calculate calculate = calculateRepository.findById(calculateId)
                 .orElseThrow(() -> new IllegalArgumentException("정산 없음"));
 
-        calculate.setStatus(CalculateStatus.PENDING);
+        calculate.changeStatus(CalculateStatus.PENDING);
         calculateRepository.save(calculate);
     }
 

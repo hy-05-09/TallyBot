@@ -4,12 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Getter
-@Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "calculate")
@@ -35,7 +34,22 @@ public class Calculate{
     private UserGroup userGroup;
 
     @OneToMany(mappedBy = "calculate", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<Settlement> settlements;
+    private Set<Settlement> settlements = new HashSet<>();
+
+    @Builder
+    private Calculate(LocalDateTime startTime,
+                      LocalDateTime endTime,
+                      CalculateStatus status,
+                      UserGroup userGroup) {
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.status = (status != null) ? status : CalculateStatus.PENDING;
+        this.userGroup = userGroup;
+    }
+
+    public void changeStatus(CalculateStatus status){
+        this.status = status;
+    }
 }
 
 

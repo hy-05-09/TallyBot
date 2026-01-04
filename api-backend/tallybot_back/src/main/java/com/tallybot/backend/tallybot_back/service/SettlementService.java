@@ -71,19 +71,6 @@ public class SettlementService {
 
         ///settlement add
         if ("add".equals(field)) {
-            /// new settlement 생성
-            Settlement newSettlement = new Settlement();
-
-            /// place와 item: 기본값 처리
-            newSettlement.setPlace((String) newValue.getOrDefault("place", "default"));
-            newSettlement.setItem((String) newValue.getOrDefault("item", "default"));
-
-            /// amount 저장
-            Object rawAmount = newValue.get("amount");
-            if (!(rawAmount instanceof Integer)) {
-                throw new IllegalArgumentException("amount는 필수값입니다.");
-            }
-            newSettlement.setAmount((Integer) rawAmount);
 
             /// payer 저장
             // memberId로 결제자(Member) 조회
@@ -97,7 +84,29 @@ public class SettlementService {
             Member payer = memberRepository.findById(payerId)
                     .orElseThrow(() -> new IllegalArgumentException("결제자 없음"));
             // newSettlement에 payer 설정
-            newSettlement.setPayer(payer);
+
+            Calculate calculate = calculateRepository.findById(request.getCalculateId())
+                    .orElseThrow(() -> new IllegalArgumentException("해당 정산 ID 없음"));
+
+            Settlement newSettlement = Settlement.create(
+                    payer.getUserGroup(),
+                    payer,
+                    calculate,
+                    "",
+                    "",
+                    1
+            );
+
+            /// place와 item: 기본값 처리
+            newSettlement.changePlace((String) newValue.getOrDefault("place", "default"));
+            newSettlement.changeItem((String) newValue.getOrDefault("item", "default"));
+
+            /// amount 저장
+            Object rawAmount = newValue.get("amount");
+            if (!(rawAmount instanceof Integer)) {
+                throw new IllegalArgumentException("amount는 필수값입니다.");
+            }
+            newSettlement.changeAmount((Integer) rawAmount);
 
 
             /// participants 저장
@@ -110,6 +119,7 @@ public class SettlementService {
             Map<String, Integer> constants = request.getConstants();
             Map<String, Integer> ratios = request.getRatios();
             // Integer sum = request.getSum();
+
 
 
             if (rawParticipants == null) {
@@ -151,15 +161,13 @@ public class SettlementService {
                     Ratio ratio = new Ratio(ratioValue, ratioSum);
 
                     Participant participant = new Participant(participantKey, constant, ratio);
-                    participantSet.add(participant);
+                    newSettlement.addParticipant(participant);
                 }
             }
-            newSettlement.setParticipants(participantSet);
-            newSettlement.setUserGroup(payer.getUserGroup());
+            
 
-            Calculate calculate = calculateRepository.findById(request.getCalculateId())
-                    .orElseThrow(() -> new IllegalArgumentException("해당 정산 ID 없음"));
-            newSettlement.setCalculate(calculate);
+            
+
 
             settlementRepository.save(newSettlement);
             return newSettlement.getSettlementId();
@@ -186,13 +194,13 @@ public class SettlementService {
                     /// place 수정
                     case "place" -> {
                         if (value instanceof String place) {
-                            settlement.setPlace(place);
+                            settlement.changePlace(place);
                         }
                     }
                     /// item 수정
                     case "item" -> {
                         if (value instanceof String item) {
-                            settlement.setItem(item);
+                            settlement.changeItem(item);
                         }
                     }
                     /// amount 수정
@@ -200,7 +208,7 @@ public class SettlementService {
                         Integer amount = null;
                         if (value instanceof Integer i) {
                             amount = i;
-                            settlement.setAmount(amount);
+                            settlement.changeAmount(amount);
                         }
                     }
                     /// payer 수정
@@ -214,7 +222,7 @@ public class SettlementService {
                         if (payerId != null) {
                             Member payer = memberRepository.findById(payerId)
                                     .orElseThrow(() -> new IllegalArgumentException("Member entity not found."));
-                            settlement.setPayer(payer);
+                            settlement.correctPayer(payer);
                         }
                     }
                     /// participants 수정
@@ -300,7 +308,7 @@ public class SettlementService {
         calculateDetailRepository.deleteByCalculate(calculate);
         optimizationService.calculateAndOptimize(settlementList);
 
-        calculate.setStatus(CalculateStatus.PENDING);
+        calculate.changeStatus(CalculateStatus.PENDING);
         calculateRepository.save(calculate);
     }
 
@@ -310,17 +318,11 @@ public class SettlementService {
      */
     public Settlement toSettlement(SettlementDto settlementDto, Long calculateId) {
         // 정보 채우기
-        Settlement settlement = new Settlement();
-
-        settlement.setPlace(settlementDto.getPlace());
-        settlement.setItem(settlementDto.getItem());
-        settlement.setAmount(settlementDto.getAmount());
 
         // Calculate 및 Group 정보 설정
         Calculate calculate = calculateRepository.findById(calculateId)
                 .orElseThrow(() -> new IllegalArgumentException("Calculate entity not found."));
         UserGroup userGroup = calculate.getUserGroup();
-        settlement.setUserGroup(userGroup);
 
         // Payer 조회
         String payerInfo = settlementDto.getPayer(); // ✅ 올바른 접근
@@ -330,8 +332,15 @@ public class SettlementService {
 
         Member payer = memberRepository.findByMemberIdAndUserGroup(payerId, userGroup)
                 .orElseThrow(() -> new IllegalArgumentException("Participant member not found in group. ID: " + payerId));
-        settlement.setPayer(payer);
 
+        Settlement settlement = Settlement.create(
+                userGroup,
+                payer,
+                calculate,
+                settlementDto.getPlace(),
+                settlementDto.getItem(),
+                settlementDto.getAmount()
+        );
 
 //         비율의 분모를 만들기 위해 합한다.
         int sum = 0;
@@ -352,12 +361,14 @@ public class SettlementService {
 
             Participant.ParticipantKey pk = new Participant.ParticipantKey(settlement, member);
             participants.add(new Participant(pk, constant, new Ratio(ratio, sum)));
+            
         }
 
+        for (Participant participant : participants){
+            settlement.addParticipant(participant);
+        }
 
-
-        settlement.setParticipants(participants);
-        settlement.setCalculate(calculate);
+        
 
         return settlement;
     }

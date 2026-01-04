@@ -2,14 +2,15 @@ package com.tallybot.backend.tallybot_back.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import lombok.Builder;
+import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Embeddable
-@Builder
 @Getter
 @EqualsAndHashCode
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Ratio {
     @Column(name = "numerator", nullable = false, columnDefinition = "INT")
     private int numerator;
@@ -37,10 +38,6 @@ public class Ratio {
     public Ratio(int i) {
         this.numerator = i;
         this.denominator = 1;
-    }
-
-    public Ratio() {
-        this.numerator = this.denominator = 1;
     }
 
     public static Ratio neg(Ratio r) {
