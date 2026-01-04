@@ -1,26 +1,26 @@
 package com.tallybot.backend.tallybot_back.debtopt;
 
 public class ThreeTuple<E, F, G> {
-    E f;
-    F s;
-    G t;
+    private final E first;
+    private final F second;
+    private final G third;
 
     public ThreeTuple(E first, F second, G third) {
-        this.f = first;
-        this.s = second;
-        this.t = third;
+        this.first = first;
+        this.second = second;
+        this.third = third;
     }
 
     public E first() {
-        return f;
+        return first;
     }
 
     public F second() {
-        return s;
+        return second;
     }
 
     public G third() {
-        return t;
+        return third;
     }
 
     @Override

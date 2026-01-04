@@ -8,10 +8,10 @@ import java.util.Map;
 import java.util.ArrayList;
 
 public final class FlattedGraph {
-    Pair<InfiniteIterator<WeightStrategy>, ThreeTuple<List<Integer>, Map<Integer, Integer>, List<Integer>>> p;
+    private Pair<InfiniteIterator<WeightStrategy>, ThreeTuple<List<Integer>, Map<Integer, Integer>, List<Integer>>> data;
 
     public FlattedGraph(InfiniteIterator<WeightStrategy> ws, ThreeTuple<List<Integer>, Map<Integer, Integer>, List<Integer>> t) {
-        p = Pair.of(ws, t);
+        this.data = Pair.of(ws, t);
     }
 
     public FlattedGraph(InfiniteIterator<WeightStrategy> ws, List<Integer> circuit, Map<Integer, Integer> weightFrequency, List<Integer> weights) {
@@ -21,42 +21,58 @@ public final class FlattedGraph {
     }
 
     public FlattedGraph(FlattedGraph f) {
-        this(f.p.getFirst(), new ArrayList<>(f.p.getSecond().first()), new HashMap<>(f.p.getSecond().second()), new ArrayList<>(f.p.getSecond().third()));
+        this(f.getWeightStrategies(), new ArrayList<>(f.getCircuit()), new HashMap<>(f.getWeightFrequency()), new ArrayList<>(f.getWeights()));
     }
 
     public InfiniteIterator<WeightStrategy> getWeightStrategies() {
-        return p.getFirst();
+        return data.getFirst();
     }
 
     public void setWeightStrategies(InfiniteIterator<WeightStrategy> ws) {
-        p = Pair.of(ws, p.getSecond());
+        data = Pair.of(ws, data.getSecond());
     }
 
     public List<Integer> getCircuit() {
-        return p.getSecond().first();
+        return data.getSecond().first();
     }
 
+    public void setCircuit(List<Integer> circuit) {
+        data = Pair.of(data.getFirst(), new ThreeTuple<>(circuit, data.getSecond().second(), data.getSecond().third()));
+    }
+
+    /**
+     * @deprecated Use {@link #setCircuit(List)} instead.
+     */
+    @Deprecated
     public void setChangeable(List<Integer> circuit) {
-        p = Pair.of(p.getFirst(), new ThreeTuple<>(circuit, p.getSecond().second(), p.getSecond().third()));
+        setCircuit(circuit);
     }
 
     public Map<Integer, Integer> getWeightFrequency() {
-        return p.getSecond().second();
+        return data.getSecond().second();
     }
 
     public void setWeightFrequency(Map<Integer, Integer> weightFrequency) {
-        p = Pair.of(p.getFirst(), new ThreeTuple<>(p.getSecond().first(), weightFrequency, p.getSecond().third()));
+        data = Pair.of(data.getFirst(), new ThreeTuple<>(data.getSecond().first(), weightFrequency, data.getSecond().third()));
     }
 
     public List<Integer> getWeights() {
-        return p.getSecond().third();
+        return data.getSecond().third();
     }
 
     public void setWeights(List<Integer> weights) {
-        p = Pair.of(p.getFirst(), new ThreeTuple<>(p.getSecond().first(), p.getSecond().second(), weights));
+        data = Pair.of(data.getFirst(), new ThreeTuple<>(data.getSecond().first(), data.getSecond().second(), weights));
     }
 
+    public ThreeTuple<List<Integer>, Map<Integer, Integer>, List<Integer>> getGraphData(){
+        return data.getSecond();
+    }
+
+    /**
+     * @deprecated Use {@link #getGraphData()} instead.
+     */
+    @Deprecated
     public ThreeTuple<List<Integer>, Map<Integer, Integer>, List<Integer>> getSecond() {
-        return p.getSecond();
+        return getGraphData();
     }
 }

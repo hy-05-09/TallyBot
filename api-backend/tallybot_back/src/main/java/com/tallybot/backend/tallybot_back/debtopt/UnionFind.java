@@ -3,36 +3,38 @@ package com.tallybot.backend.tallybot_back.debtopt;
 import java.util.*;
 
 public class UnionFind {
-    List<Integer> disjointSet;
-    List<Integer> rank;
+    private final List<Integer> disjointSet;
+    private final List<Integer> size;
 
     public UnionFind(int vertices) {
         disjointSet = new ArrayList<>(vertices);
-        rank = new ArrayList<>(Collections.nCopies(vertices, 1));
+        size = new ArrayList<>(Collections.nCopies(vertices, 1));
         for(int i = 0; i < vertices; i++) {
             disjointSet.add(i);
         }
     }
 
     public int find(int idx) {
-        if(idx == disjointSet.get(idx)) return idx;
-
-        disjointSet.set(idx, find(disjointSet.get(idx)));
-        return find(disjointSet.get(idx));
+        if (idx != disjointSet.get(idx)){
+            disjointSet.set(idx, find(disjointSet.get(idx)));
+        }
+        return disjointSet.get(idx);
     }
 
     public void union(int a, int b) {
         a = find(a);
         b = find(b);
 
-        if(rank.get(a) < rank.get(b)) {
+        if (a==b) return;
+
+        if(size.get(a) < size.get(b)) {
             int tmp = a;
             a = b;
             b = tmp;
         }
 
         disjointSet.set(b, a);
-        rank.set(a, rank.get(a) + rank.get(b));
+        size.set(a, size.get(a) + size.get(b));
     }
 
     public static List<Graph> splitGraph(Graph g) {

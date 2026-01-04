@@ -2,11 +2,18 @@ package com.tallybot.backend.tallybot_back.debtopt;
 
 import org.springframework.data.util.Pair;
 
-import java.util.*;
-import java.util.function.UnaryOperator;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.List;
+import java.util.function.UnaryOperator;
 
 public class Graph {
     // 인접 리스트: 각 정점(인덱스)은 (종점, 가중치) 쌍의 맵을 가짐
@@ -67,24 +74,7 @@ public class Graph {
         }
     }
 
-//    public void addEdge(int source, int destination, int weight) {
-//        // 입력 검증
-//        if (source < 0 || source >= adjacencyList.size() ||
-//                destination < 0 || destination >= adjacencyList.size()) {
-//            throw new IllegalArgumentException("Invalid vertex index");
-//        }
-//
-//        // 이미 존재하는 간선인지 확인
-//        if (getWeight(source, destination) != Integer.MAX_VALUE) {
-//            throw new IllegalArgumentException("Edge already exists");
-//        }
-//
-//        // 양방향 간선 추가 (source -> destination: weight, destination -> source: -weight)
-//        adjacencyList.get(source).put(destination, weight);
-//        adjacencyList.get(destination).put(source, -weight);
-//        sz++;
-//    }
-//
+
     // 간선 제거 메소드
     public void removeEdge(int source, int destination) {
         // 입력 검증
@@ -777,7 +767,7 @@ class MinMidRemove implements WeightStrategy {
 class MaxNumRemove implements WeightStrategy {
     @Override
     public int getWeight(FlattedGraph f) {
-        var m =  f.getSecond().second();
+        Map<Integer, Integer> m = f.getWeightFrequency();
         int maxNum = Integer.MIN_VALUE;
         int maxNumIdx = -1;
 
@@ -800,7 +790,7 @@ class MaxNumRemove implements WeightStrategy {
 class MinNumRemove implements WeightStrategy {
     @Override
     public int getWeight(FlattedGraph f) {
-        var m =  f.getSecond().second();
+        Map<Integer, Integer> m = f.getWeightFrequency();
         int minNum = Integer.MAX_VALUE;
         int minNumIdx = -1;
 

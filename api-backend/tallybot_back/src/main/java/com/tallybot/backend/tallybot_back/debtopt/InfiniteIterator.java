@@ -1,10 +1,11 @@
 package com.tallybot.backend.tallybot_back.debtopt;
 
+
 import java.util.List;
 
 public class InfiniteIterator<E> {
-    final List<E> list;
-    int idx;
+    private final List<E> list;
+    private final int idx;
 
     private InfiniteIterator(List<E> list, int idx) {
         this.list = list;
@@ -12,21 +13,22 @@ public class InfiniteIterator<E> {
     }
 
     public static <E> InfiniteIterator<E> begin(List<E> list) {
+        if (list == null || list.isEmpty()){
+            throw new IllegalArgumentException("List must not be null or empty");
+        }
         return new InfiniteIterator<>(list, 0);
     }
 
     public InfiniteIterator<E> increment() {
-        if(this.idx + 1 == list.size())
-            return new InfiniteIterator<>(list, 0);
-        else
-            return new InfiniteIterator<>(list, idx + 1);
+        int next = (idx+1)%list.size();
+        return new InfiniteIterator<>(list, next);
     }
 
     public E value() {
-        return this.list.get(this.idx);
+        return list.get(idx);
     }
 
-    public final List<E> getInnerList() {
-        return list;
+    public List<E> getInnerList() {
+        return List.copyOf(list);
     }
 }
